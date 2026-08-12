@@ -8,6 +8,7 @@ import LoadingSpinner from "@/components/shared/LoadingSpinner.jsx";
 import EmptyState from "@/components/shared/EmptyState.jsx";
 import ProductCard from "@/components/shared/ProductCard.jsx";
 import CurrentViewersBadge from "@/components/shared/CurrentViewersBadge.jsx";
+import AppointmentDialog from "@/components/public/AppointmentDialog.jsx";
 import { trackProductView, useProductSave } from "@/hooks/useProductAnalytics";
 
 export default function ProductPage() {
@@ -19,6 +20,7 @@ export default function ProductPage() {
   const { isSaved,saving,toggleSave }=useProductSave(product?.id);
   const { products:relatedProducts }=useRelatedProducts(product?.category_id,product?.id);
   const viewed=useRef(new Set());
+  const [appointmentOpen, setAppointmentOpen] = useState(false);
 
   useEffect(()=>{ if(!product?.id||viewed.current.has(product.id))return; viewed.current.add(product.id); trackProductView(product.id); },[product?.id]);
   useEffect(()=>setActiveImage(0),[product?.id]);
@@ -60,7 +62,7 @@ export default function ProductPage() {
         <div className="mt-5 flex flex-wrap gap-2">
           {phone&&<a href={`tel:${phone}`} className="inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground"><Phone className="h-4 w-4"/> Call</a>}
           {whatsapp&&<a href={`https://wa.me/${String(whatsapp).replace(/\D/g,"")}?text=${whatsappText}`} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 rounded-xl border px-4 py-3 text-sm font-semibold"><MessageCircle className="h-4 w-4"/> WhatsApp</a>}
-          <button type="button" disabled className="inline-flex items-center gap-2 rounded-xl border px-4 py-3 text-sm font-semibold opacity-60"><CalendarDays className="h-4 w-4"/> Appointment — Coming next</button>
+          <button type="button" onClick={()=>setAppointmentOpen(true)} className="inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground"><CalendarDays className="h-4 w-4"/> Appointment</button>
         </div>
 
         {product.description&&<div className="mt-6"><h2 className="mb-2 font-semibold">About Doctor</h2><p className="whitespace-pre-line text-sm leading-relaxed text-foreground/90">{product.description}</p></div>}
@@ -72,5 +74,11 @@ export default function ProductPage() {
     </div>
 
     {relatedProducts.length>0&&<section className="mt-12"><h2 className="mb-4 text-lg font-bold" style={{fontFamily:"'Tiro Bangla', serif"}}>Related Doctors</h2><div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">{relatedProducts.map(p=><ProductCard key={p.id} product={p}/>)}</div></section>}
+    {appointmentOpen && <AppointmentDialog
+      doctor={product}
+      chamber={chamber}
+      onClose={()=>setAppointmentOpen(false)}
+      onCreated={()=>{ setAppointmentOpen(false); window.alert("Appointment request পাঠানো হয়েছে।"); }}
+    />}
   </div>;
 }

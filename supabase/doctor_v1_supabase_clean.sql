@@ -2897,3 +2897,21 @@ on conflict do nothing;
 -- ============================================================
 -- END — DOCTOR PLATFORM V1 DATABASE SETUP
 -- ============================================================
+
+-- ============================================================
+-- DOCTOR V1 BRAND + BANGLA CATEGORY SEED
+-- ============================================================
+insert into public.site_settings(key,value) values
+('site_name','সিরাজগঞ্জ ডাক্তার'),
+('site_logo_url','/doctor-logo.svg'),
+('footer_address','সিরাজগঞ্জ, বাংলাদেশ')
+on conflict (key) do update set value=excluded.value;
+
+insert into public.categories(name,slug,icon_url,sort_order) values
+('হৃদরোগ','hridrog','/categories/heart.svg',1),
+('চক্ষু','chokshu','/categories/eye.svg',2),
+('দন্ত চিকিৎসা','donto-chikitsa','/categories/dental.svg',3),
+('হাড় ও জয়েন্ট','har-o-joint','/categories/bone.svg',4),
+('শিশু রোগ','shishu-rog','/categories/child.svg',5),
+('মেডিসিন','medicine','/categories/medicine.svg',6)
+on conflict (slug) do update set name=excluded.name, icon_url=excluded.icon_url, sort_order=excluded.sort_order;

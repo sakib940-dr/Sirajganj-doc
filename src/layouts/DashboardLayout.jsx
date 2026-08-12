@@ -3,14 +3,13 @@ import { Outlet, Link, NavLink } from "react-router-dom";
 import {
   LayoutDashboard,
   Store,
-  Package,
   Images,
   ShieldCheck,
   TrendingUp,
-  ArrowLeft,
   Menu,
   X,
   KeyRound,
+  CalendarDays,
 } from "lucide-react";
 import Sidebar from "@/components/layout/Sidebar.jsx";
 import BottomNav from "@/components/layout/BottomNav.jsx";
@@ -20,15 +19,15 @@ import { cn } from "@/lib/utils";
 
 const navItems = [
   { to: ROUTES.DASHBOARD, label: "ওভারভিউ", icon: LayoutDashboard, end: true },
+  { to: ROUTES.DASHBOARD_APPOINTMENTS, label: "অ্যাপয়েন্টমেন্ট", icon: CalendarDays },
   { to: ROUTES.DASHBOARD_ANALYTICS, label: "অ্যানালিটিক্স", icon: TrendingUp },
   { to: ROUTES.DASHBOARD_SHOP, label: "চেম্বারের তথ্য", icon: Store },
-  { to: ROUTES.DASHBOARD_PRODUCTS, label: "ডাক্তার প্রোফাইল", icon: Package },
   { to: ROUTES.DASHBOARD_GALLERY, label: "গ্যালারি", icon: Images },
   { to: ROUTES.DASHBOARD_VERIFICATION, label: "ভেরিফিকেশন", icon: ShieldCheck },
 ];
 
 export default function DashboardLayout() {
-  const { profile } = useAuth();
+  const { profile, signOut } = useAuth();
   const [drawerOpen, setDrawerOpen] = useState(false);
 
   return (
@@ -45,14 +44,7 @@ export default function DashboardLayout() {
             >
               <Menu className="h-5 w-5" />
             </button>
-            <Link
-              to={ROUTES.HOME}
-              className="hidden items-center gap-2 text-sm text-muted-foreground hover:text-foreground md:flex"
-            >
-              <ArrowLeft className="h-4 w-4" />
-              মূল সাইটে ফিরুন
-            </Link>
-          </div>
+</div>
           <div className="flex items-center gap-3">
             <span className="truncate text-sm font-medium">{profile?.full_name || "ডাক্তার প্যানেল"}</span>
             <Link
@@ -62,6 +54,13 @@ export default function DashboardLayout() {
               <KeyRound className="h-4 w-4" />
               পাসওয়ার্ড
             </Link>
+            <button
+              type="button"
+              onClick={signOut}
+              className="hidden text-sm font-medium text-destructive hover:underline md:block"
+            >
+              লগআউট
+            </button>
           </div>
         </div>
       </div>
@@ -128,15 +127,14 @@ export default function DashboardLayout() {
               <KeyRound className="h-4 w-4" />
               পাসওয়ার্ড পরিবর্তন
             </Link>
-            <Link
-              to={ROUTES.HOME}
-              onClick={() => setDrawerOpen(false)}
-              className="flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-muted-foreground hover:text-foreground"
+            <button
+              type="button"
+              onClick={async () => { setDrawerOpen(false); await signOut(); }}
+              className="flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium text-destructive hover:bg-destructive/10"
             >
-              <ArrowLeft className="h-4 w-4" />
-              মূল সাইটে ফিরুন
-            </Link>
-          </nav>
+              লগআউট
+            </button>
+</nav>
         </div>
       </div>
 

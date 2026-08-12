@@ -1,0 +1,43 @@
+import { useState } from "react";
+import { CalendarDays, CheckCircle2, XCircle, Clock3 } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
+import { useAppointments, updateAppointmentStatus } from "@/hooks/useAppointments";
+import { ROLES } from "@/constants/roles";
+import LoadingSpinner from "@/components/shared/LoadingSpinner.jsx";
+
+const labels = { pending:"অপেক্ষমাণ", confirmed:"নিশ্চিত", cancelled:"বাতিল", completed:"সম্পন্ন", rescheduled:"পুনঃনির্ধারিত" };
+
+export default function AppointmentsPage() {
+  const { user, role } = useAuth();
+  const { appointments, loading, error, refresh } = useAppointments({ role, userId:user?.id, enabled:role==="doctor" });
+  const [busy,setBusy]=useState(null);
+
+  async function change(a,status){
+    setBusy(a.id);
+    const {error}=await updateAppointmentStatus(a.id,status);
+    setBusy(null);
+    if(!error) refresh();
+  }
+
+  if(loading) return <LoadingSpinner fullScreen label="Appointment লোড হচ্ছে..."/>;
+  return <div className="space-y-5">
+    <div><h1 className="text-xl font-bold">অ্যাপয়েন্টমেন্ট</h1><p className="text-sm text-muted-foreground">আপনার কাছে আসা রোগীর appointment request</p></div>
+    {error&&<div className="rounded-xl bg-destructive/10 p-3 text-sm text-destructive">{error}</div>}
+    {!appointments.length&&<div className="rounded-2xl border p-8 text-center text-sm text-muted-foreground">এখনো কোনো appointment request নেই।</div>}
+    <div className="space-y-3">
+      {appointments.map(a=><div key={a.id} className="rounded-2xl border bg-card p-4">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+          <div>
+            <p className="font-semibold">{a.patient_name || "Patient"}</p>
+            <p className="mt-1 text-sm text-muted-foreground">{a.patient_phone || "ফোন দেওয়া হয়নি"}</p>
+            <div className="mt-3 flex flex-wrap gap-3 text-sm"><span className="flex items-center gap-1"><CalendarDays className="h-4 w-4 text-primary"/>{a.appointment_date}</span>{a.appointment_time&&<span className="flex items-center gap-1"><Clock3 className="h-4 w-4 text-primary"/>{a.appointment_time}</span>}</div>
+            {a.note&&<p className="mt-2 rounded-lg bg-secondary p-2 text-sm">{a.note}</p>}
+          </div>
+          <span className="rounded-full bg-secondary px-3 py-1 text-xs font-medium">{labels[a.status]||a.status}</span>
+        </div>
+        {a.status==="pending"&&<div className="mt-4 flex gap-2"><button disabled={busy===a.id} onClick={()=>change(a,"confirmed")} className="inline-flex items-center gap-1 rounded-xl bg-primary px-3 py-2 text-sm font-semibold text-primary-foreground"><CheckCircle2 className="h-4 w-4"/> Confirm</button><button disabled={busy===a.id} onClick={()=>change(a,"cancelled")} className="inline-flex items-center gap-1 rounded-xl border px-3 py-2 text-sm font-semibold"><XCircle className="h-4 w-4"/> Reject</button></div>}
+        {a.status==="confirmed"&&<button disabled={busy===a.id} onClick={()=>change(a,"completed")} className="mt-4 rounded-xl border px-3 py-2 text-sm font-semibold">Mark as completed</button>}
+      </div>)}
+    </div>
+  </div>;
+}

@@ -68,7 +68,8 @@ export default function DashboardHome() {
       {/* ================= সামারি কার্ড: এক নজরে সবকিছু ================= */}
       <div>
         <div className="mb-3 flex items-center justify-between">
-          <h2 className="text-sm font-semibold text-muted-foreground sm:text-base">
+          <Link to={ROUTES.DASHBOARD_APPOINTMENTS} className="mb-3 inline-flex rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground">অ্যাপয়েন্টমেন্টের অনুরোধ</Link>
+        <h2 className="text-sm font-semibold text-muted-foreground sm:text-base">
             আপনার চেম্বারের সারসংক্ষেপ
           </h2>
           <Link

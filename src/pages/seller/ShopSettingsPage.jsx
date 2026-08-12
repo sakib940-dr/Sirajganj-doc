@@ -12,6 +12,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import ImageUploader from "@/components/shared/ImageUploader.jsx";
 import LoadingSpinner from "@/components/shared/LoadingSpinner.jsx";
 import ShareShopButton from "@/components/shared/ShareShopButton.jsx";
+import ProductEditPage from "@/pages/seller/ProductEditPage.jsx";
 
 const EMPTY = {
   shop_name: "", slug: "", logo_url: "", banner_url: "", about: "",
@@ -69,9 +70,9 @@ export default function ShopSettingsPage() {
         : await supabase.from("shops").insert(payload).select().single();
       if (saveError) {
         if (saveError.message.toLowerCase().includes("row-level security"))
-          setError("অনুমতি নেই — Doctor account Approved হওয়ার পর Chamber তৈরি/আপডেট করা যাবে।");
+          setError("অনুমতি নেই — Doctor account Approved হওয়ার পর চেম্বার তৈরি/আপডেট করা যাবে।");
         else if (saveError.message.includes("duplicate"))
-          setError("এই লিংকটি অন্য একটি Chamber ব্যবহার করছে।");
+          setError("এই লিংকটি অন্য একটি চেম্বার ব্যবহার করছে।");
         else setError("সংরক্ষণ ব্যর্থ হয়েছে: " + saveError.message);
         return;
       }
@@ -80,18 +81,18 @@ export default function ShopSettingsPage() {
     } finally { setSaving(false); }
   };
 
-  if (loading) return <LoadingSpinner label="Chamber তথ্য লোড হচ্ছে..." />;
+  if (loading) return <LoadingSpinner label="চেম্বার তথ্য লোড হচ্ছে..." />;
 
   return (
     <div className="max-w-2xl space-y-6">
       <div>
-        <h1 className="text-xl font-bold" style={{ fontFamily: "'Tiro Bangla', serif" }}>Chamber Settings</h1>
-        <p className="text-sm text-muted-foreground">আপনার Chamber-এর public information এখান থেকে পরিচালনা করুন।</p>
+        <h1 className="text-xl font-bold" style={{ fontFamily: "'Tiro Bangla', serif" }}>চেম্বার / হাসপাতালের সেটিংস</h1>
+        <p className="text-sm text-muted-foreground">আপনার চেম্বার-এর পাবলিক তথ্য এখান থেকে পরিচালনা করুন।</p>
       </div>
 
       {shopId && (
         <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-primary/30 bg-secondary/60 p-4 text-sm">
-          <span>Chamber link: <span className="font-medium text-primary">/shop/{shop.slug}</span></span>
+          <span>চেম্বার লিংক: <span className="font-medium text-primary">/shop/{shop.slug}</span></span>
           <div className="flex items-center gap-2">
             <ShareShopButton shop={shop} variant="ghost" />
             <Button variant="ghost" size="sm" asChild>
@@ -103,9 +104,9 @@ export default function ShopSettingsPage() {
 
       <form onSubmit={handleSubmit} className="space-y-5">
         <Card>
-          <CardHeader><CardTitle className="text-base">Chamber Branding</CardTitle><CardDescription>Logo ও banner public Chamber page-এ দেখাবে।</CardDescription></CardHeader>
+          <CardHeader><CardTitle className="text-base">চেম্বারের ব্র্যান্ডিং</CardTitle><CardDescription>লোগো ও ব্যানার চেম্বারের পাবলিক পেজে দেখাবে।</CardDescription></CardHeader>
           <CardContent className="flex flex-wrap gap-6">
-            <div><Label className="mb-2 block">Chamber Logo</Label>
+            <div><Label className="mb-2 block">চেম্বারের লোগো</Label>
               <ImageUploader bucket="shop-logos" folder={user.id} value={shop.logo_url} onUploaded={url => update("logo_url", url)} />
             </div>
             <div className="min-w-[220px] flex-1"><Label className="mb-2 block">Banner</Label>
@@ -115,50 +116,58 @@ export default function ShopSettingsPage() {
         </Card>
 
         <Card>
-          <CardHeader><CardTitle className="text-base">Chamber Information</CardTitle></CardHeader>
+          <CardHeader><CardTitle className="text-base">চেম্বারের তথ্য</CardTitle></CardHeader>
           <CardContent className="space-y-4">
             <div className="grid gap-4 sm:grid-cols-2">
-              <div><Label>Chamber Name *</Label><Input required value={shop.shop_name} onChange={e => handleName(e.target.value)} /></div>
-              <div><Label>Chamber Type</Label><Input placeholder="Private Chamber / Clinic" value={shop.chamber_type || ""} onChange={e => update("chamber_type", e.target.value)} /></div>
+              <div><Label>চেম্বারের নাম *</Label><Input required value={shop.shop_name} onChange={e => handleName(e.target.value)} /></div>
+              <div><Label>চেম্বারের ধরন</Label><Input placeholder="ব্যক্তিগত চেম্বার / ক্লিনিক" value={shop.chamber_type || ""} onChange={e => update("chamber_type", e.target.value)} /></div>
             </div>
-            <div><Label>Chamber Link (slug) *</Label><Input required value={shop.slug} onChange={e => { setSlugEdited(true); update("slug", e.target.value); }} /></div>
-            <div><Label>About Chamber</Label><textarea rows={3} value={shop.about || ""} onChange={e => update("about", e.target.value)} className="flex w-full rounded-lg border border-input bg-card px-3 py-2 text-sm" /></div>
+            <div><Label>চেম্বারের লিংক *</Label><Input required value={shop.slug} onChange={e => { setSlugEdited(true); update("slug", e.target.value); }} /></div>
+            <div><Label>চেম্বার সম্পর্কে</Label><textarea rows={3} value={shop.about || ""} onChange={e => update("about", e.target.value)} className="flex w-full rounded-lg border border-input bg-card px-3 py-2 text-sm" /></div>
           </CardContent>
         </Card>
 
         <Card>
-          <CardHeader><CardTitle className="text-base">Schedule & Consultation</CardTitle></CardHeader>
+          <CardHeader><CardTitle className="text-base">সময়সূচি ও পরামর্শ</CardTitle></CardHeader>
           <CardContent className="space-y-4">
             <div className="grid gap-4 sm:grid-cols-2">
-              <div><Label>Visiting Days</Label><Input placeholder="Sat, Sun, Mon" value={shop.visiting_days || ""} onChange={e => update("visiting_days", e.target.value)} /></div>
-              <div><Label>Visiting Time</Label><Input placeholder="5:00 PM – 9:00 PM" value={shop.visiting_time || ""} onChange={e => update("visiting_time", e.target.value)} /></div>
+              <div><Label>রোগী দেখার দিন</Label><Input placeholder="শনি, রবি, সোম" value={shop.visiting_days || ""} onChange={e => update("visiting_days", e.target.value)} /></div>
+              <div><Label>রোগী দেখার সময়</Label><Input placeholder="বিকেল ৫টা – রাত ৯টা" value={shop.visiting_time || ""} onChange={e => update("visiting_time", e.target.value)} /></div>
             </div>
             <div className="grid gap-4 sm:grid-cols-2">
-              <div><Label>Consultation Fee (৳)</Label><Input type="number" min="0" value={shop.consultation_fee || ""} onChange={e => update("consultation_fee", e.target.value)} /></div>
-              <div><Label>Assistant Phone</Label><Input value={shop.assistant_phone || ""} onChange={e => update("assistant_phone", e.target.value)} /></div>
+              <div><Label>পরামর্শ ফি (৳)</Label><Input type="number" min="0" value={shop.consultation_fee || ""} onChange={e => update("consultation_fee", e.target.value)} /></div>
+              <div><Label>সহকারীর ফোন</Label><Input value={shop.assistant_phone || ""} onChange={e => update("assistant_phone", e.target.value)} /></div>
             </div>
           </CardContent>
         </Card>
 
         <Card>
-          <CardHeader><CardTitle className="text-base">Contact & Location</CardTitle></CardHeader>
+          <CardHeader><CardTitle className="text-base">চেম্বার / হাসপাতালের যোগাযোগ ও অবস্থান</CardTitle></CardHeader>
           <CardContent className="space-y-4">
             <div className="grid gap-4 sm:grid-cols-2">
-              <div><Label>Phone</Label><Input value={shop.phone || ""} onChange={e => update("phone", e.target.value)} /></div>
-              <div><Label>WhatsApp</Label><Input value={shop.whatsapp_number || ""} onChange={e => update("whatsapp_number", e.target.value)} /></div>
+              <div><Label>ফোন</Label><Input value={shop.phone || ""} onChange={e => update("phone", e.target.value)} /></div>
+              <div><Label>হোয়াটসঅ্যাপ</Label><Input value={shop.whatsapp_number || ""} onChange={e => update("whatsapp_number", e.target.value)} /></div>
             </div>
-            <div><Label>Address</Label><Input value={shop.address || ""} onChange={e => update("address", e.target.value)} /></div>
-            <div><Label>Google Map Link</Label><Input value={shop.google_map_link || ""} onChange={e => update("google_map_link", e.target.value)} /></div>
-            <div><Label>Facebook Link</Label><Input value={shop.facebook_link || ""} onChange={e => update("facebook_link", e.target.value)} /></div>
+            <div><Label>ঠিকানা</Label><Input value={shop.address || ""} onChange={e => update("address", e.target.value)} /></div>
+            <div><Label>গুগল ম্যাপ লিংক</Label><Input value={shop.google_map_link || ""} onChange={e => update("google_map_link", e.target.value)} /></div>
+            <div><Label>ফেসবুক লিংক</Label><Input value={shop.facebook_link || ""} onChange={e => update("facebook_link", e.target.value)} /></div>
           </CardContent>
         </Card>
 
         {error && <p className="text-sm text-destructive">{error}</p>}
         <Button type="submit" disabled={saving} size="lg">
           {saved ? <Check className="h-4 w-4" /> : <Save className="h-4 w-4" />}
-          {saving ? "সংরক্ষণ হচ্ছে..." : saved ? "সংরক্ষিত হয়েছে" : "Chamber Settings সংরক্ষণ করুন"}
+          {saving ? "সংরক্ষণ হচ্ছে..." : saved ? "সংরক্ষিত হয়েছে" : "চেম্বার / হাসপাতালের সেটিংস সংরক্ষণ করুন"}
         </Button>
       </form>
+
+      <div className="pt-2">
+        <div className="mb-4">
+          <h2 className="text-lg font-bold" style={{ fontFamily: "'Tiro Bangla', serif" }}>ডাক্তারের প্রোফাইল</h2>
+          <p className="text-sm text-muted-foreground">চেম্বার / হাসপাতালের তথ্যের নিচেই আপনার পাবলিক ডাক্তার প্রোফাইল সম্পূর্ণ করুন।</p>
+        </div>
+        <ProductEditPage embedded />
+      </div>
     </div>
   );
 }

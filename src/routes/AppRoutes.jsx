@@ -26,6 +26,7 @@ import PrivacyPage from "@/pages/public/PrivacyPage.jsx";
 import FaqPage from "@/pages/public/FaqPage.jsx";
 import HelpPage from "@/pages/public/HelpPage.jsx";
 import FeedbackPage from "@/pages/public/FeedbackPage.jsx";
+import PatientAppointmentsPage from "@/pages/public/AppointmentsPage.jsx";
 import NotFoundPage from "@/pages/public/NotFoundPage.jsx";
 
 // Seller
@@ -36,6 +37,7 @@ import ProductEditPage from "@/pages/seller/ProductEditPage.jsx";
 import GalleryPage from "@/pages/seller/GalleryPage.jsx";
 import SellerVerificationPage from "@/pages/seller/SellerVerificationPage.jsx";
 import AnalyticsPage from "@/pages/seller/AnalyticsPage.jsx";
+import DoctorAppointmentsPage from "@/pages/seller/AppointmentsPage.jsx";
 
 // Admin
 import AdminDashboard from "@/pages/admin/AdminDashboard.jsx";
@@ -105,6 +107,7 @@ export default function AppRoutes() {
         <Route path={ROUTES.DASHBOARD_GALLERY} element={<GalleryPage />} />
         <Route path={ROUTES.DASHBOARD_VERIFICATION} element={<SellerVerificationPage />} />
         <Route path={ROUTES.DASHBOARD_ANALYTICS} element={<AnalyticsPage />} />
+        <Route path={ROUTES.DASHBOARD_APPOINTMENTS} element={<DoctorAppointmentsPage />} />
       </Route>
 
       {/* Admin Panel (protected, role: admin অথবা super_admin) */}

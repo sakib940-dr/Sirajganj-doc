@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { Search, Tag, Store, Package, Flame, Sparkles } from "lucide-react";
+import { Search, Tag, Store, Package, Flame, Sparkles, Stethoscope } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import CategoryChipsRow from "@/components/shared/CategoryChipsRow.jsx";
@@ -37,6 +37,16 @@ export default function HomePage() {
   const { banners } = useBanners();
   const { settings } = useSiteSettings();
 
+
+  const demoDoctors = [
+    { name: "ডা. মোঃ রাকিব হাসান", degree: "এমবিবিএস, এফসিপিএস", designation: "হৃদরোগ বিশেষজ্ঞ", bmdc: "A-12345", chamber: "সিরাজগঞ্জ হার্ট কেয়ার", address: "এসএস রোড, সিরাজগঞ্জ সদর" },
+    { name: "ডা. ফারহানা আক্তার", degree: "এমবিবিএস, এফসিপিএস", designation: "স্ত্রীরোগ ও প্রসূতি বিশেষজ্ঞ", bmdc: "A-23456", chamber: "সিরাজগঞ্জ মেডিকেল সেন্টার", address: "বাজার স্টেশন, সিরাজগঞ্জ" },
+    { name: "ডা. মোঃ সাইফুল ইসলাম", degree: "এমবিবিএস, এমডি", designation: "শিশু বিশেষজ্ঞ", bmdc: "A-34567", chamber: "মা ও শিশু ক্লিনিক", address: "এসএস রোড, সিরাজগঞ্জ সদর" },
+    { name: "ডা. তানভীর আহমেদ", degree: "এমবিবিএস, এফসিপিএস", designation: "চক্ষু বিশেষজ্ঞ", bmdc: "A-45678", chamber: "সিরাজগঞ্জ চক্ষু হাসপাতাল", address: "হাসপাতাল রোড, সিরাজগঞ্জ" },
+    { name: "ডা. নাজমুল হক", degree: "বিডিএস, এফসিপিএস", designation: "দন্ত চিকিৎসক", bmdc: "A-56789", chamber: "ডেন্টাল কেয়ার সিরাজগঞ্জ", address: "মুজিব সড়ক, সিরাজগঞ্জ সদর" },
+    { name: "ডা. মাহমুদুল হাসান", degree: "এমবিবিএস, এফসিপিএস", designation: "মেডিসিন বিশেষজ্ঞ", bmdc: "A-67890", chamber: "সিরাজগঞ্জ ডায়াগনস্টিক", address: "এসএস রোড, সিরাজগঞ্জ সদর" },
+  ];
+
   const handleSearch = (e) => {
     e.preventDefault();
     if (query.trim()) navigate(`${ROUTES.SEARCH}?q=${encodeURIComponent(query.trim())}`);
@@ -62,16 +72,16 @@ export default function HomePage() {
         />
         <div className="container relative py-6 text-center md:py-12">
           <p className="mb-2 inline-flex items-center gap-1.5 rounded-full bg-accent/15 px-3 py-1 text-[11px] font-semibold text-accent md:mb-3 md:text-xs">
-            আপনার এলাকার নির্ভরযোগ্য চেম্বার খুঁজুন
+            আপনার এলাকার নির্ভরযোগ্য ডাক্তার খুঁজুন
           </p>
           <h1
             className="mx-auto max-w-2xl text-xl font-bold leading-tight md:text-4xl"
             style={{ fontFamily: "'Tiro Bangla', serif" }}
           >
-            স্থানীয় চেম্বার আর ডাক্তার প্রোফাইল —<br className="hidden sm:block" /> এখন সব এক জায়গায়
+            সিরাজগঞ্জের ডাক্তার খুঁজুন —<br className="hidden sm:block" /> এখন সব এক জায়গায়
           </h1>
           <p className="mx-auto mt-2 hidden max-w-lg text-sm text-primary-foreground/75 sm:block md:mt-3 md:text-base">
-            আপনার পাড়ার প্রিয় চেম্বারগুলোকে অনলাইনে খুঁজে নিন, ডাক্তার প্রোফাইল দেখুন, আর সরাসরি যোগাযোগ করুন।
+            আপনার এলাকার ডাক্তার খুঁজে নিন, প্রোফাইল ও চেম্বার তথ্য দেখুন, আর সরাসরি যোগাযোগ করুন।
           </p>
 
           <form onSubmit={handleSearch} className="mx-auto mt-4 flex max-w-lg gap-2 md:mt-6">
@@ -80,7 +90,7 @@ export default function HomePage() {
               <Input
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                placeholder="যেমন: শাড়ি, মোবাইল, খাবার..."
+                placeholder="যেমন: হৃদরোগের ডাক্তার, চোখের ডাক্তার, সিরাজগঞ্জ..."
                 className="h-10 rounded-lg pl-10 text-sm text-foreground md:h-12 md:text-base"
               />
             </div>
@@ -119,6 +129,30 @@ export default function HomePage() {
         ) : (
           <CategoryChipsRow categories={categories} twoRow={categories.length > 6} />
         )}
+      </section>
+
+      {/* Demo doctors — V1 preview; real verified doctors will replace these once approved. */}
+      <section className="container py-6 md:py-8">
+        <div className="mb-4 flex items-end justify-between">
+          <div><h2 className="text-lg font-bold md:text-xl" style={{ fontFamily: "'Tiro Bangla', serif" }}>ডেমো ডাক্তার প্রোফাইল</h2>
+          <p className="text-xs text-muted-foreground md:text-sm">V1-এর জন্য নমুনা প্রোফাইল</p></div>
+          <span className="rounded-full bg-primary/10 px-2.5 py-1 text-[10px] font-semibold text-primary">ডেমো</span>
+        </div>
+        <div className="no-scrollbar -mx-4 flex gap-3 overflow-x-auto px-4 pb-2">
+          {demoDoctors.map((d) => (
+            <div key={d.name} className="w-48 shrink-0 rounded-2xl border bg-card p-3 shadow-sm">
+              <div className="flex items-center gap-3">
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary"><Stethoscope className="h-6 w-6"/></div>
+                <div className="min-w-0"><h3 className="line-clamp-2 text-sm font-bold">{d.name}</h3><p className="mt-0.5 text-[11px] text-primary">{d.specialty}</p></div>
+              </div>
+              <p className="mt-3 text-[11px] text-muted-foreground">{d.degree}</p>
+              <p className="text-[11px] text-muted-foreground">{d.designation}</p>
+              <p className="mt-1 text-[10px] text-muted-foreground">বিএমডিসি: {d.bmdc}</p>
+              <p className="mt-1 text-[11px] font-medium text-foreground">{d.chamber}</p>
+              <p className="text-[10px] text-muted-foreground">{d.address}</p>
+            </div>
+          ))}
+        </div>
       </section>
 
       {/* জনপ্রিয় ডাক্তার প্রোফাইল — sold_count/view_count অনুযায়ী */}

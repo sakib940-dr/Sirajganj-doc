@@ -27,6 +27,8 @@ export const ROUTES = {
   DASHBOARD_GALLERY: "/dashboard/gallery",
   DASHBOARD_VERIFICATION: "/dashboard/verification",
   DASHBOARD_ANALYTICS: "/dashboard/analytics",
+  DASHBOARD_APPOINTMENTS: "/dashboard/appointments",
+  APPOINTMENTS: "/appointments",
 
   ADMIN: "/admin",
   ADMIN_USERS: "/admin/users",
