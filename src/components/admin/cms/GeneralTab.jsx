@@ -1,0 +1,21 @@
+import SettingsFieldGroup from "@/components/admin/cms/SettingsFieldGroup.jsx";
+
+const FIELDS = [
+  { key: "site_name", label: "ওয়েবসাইটের নাম", type: "text", required: true, maxLength: 60, placeholder: "যেমন: সিরাজগঞ্জ মার্কেটপ্লেস" },
+  { key: "site_motto", label: "মটো / ট্যাগলাইন", type: "text", maxLength: 120, placeholder: "যেমন: আপনার এলাকার সব চেম্বার, এক জায়গায়" },
+  { key: "site_logo_url", label: "ওয়েবসাইট লোগো", type: "image", folder: "branding", aspect: "square" },
+  { key: "site_favicon_url", label: "ফেভিকন (ব্রাউজার ট্যাব আইকন)", type: "image", folder: "branding", aspect: "square", help: "বর্গাকার ছবি ব্যবহার করুন, আদর্শ সাইজ 512×512px" },
+];
+
+export default function GeneralTab({ values, saveFields, clearFields }) {
+  return (
+    <SettingsFieldGroup
+      title="সাধারণ তথ্য"
+      description="সাইটের নাম, মটো, লোগো ও ফেভিকন এখান থেকে নিয়ন্ত্রণ করুন — এগুলো পুরো ওয়েবসাইট জুড়ে প্রদর্শিত হবে।"
+      fields={FIELDS}
+      values={values}
+      onSave={saveFields}
+      onClearField={(key) => clearFields([key])}
+    />
+  );
+}

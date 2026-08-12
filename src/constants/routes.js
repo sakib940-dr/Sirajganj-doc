@@ -1,0 +1,46 @@
+export const ROUTES = {
+  HOME: "/",
+  CATEGORY: "/category/:slug",
+  SHOP: "/shop/:shopSlug",
+  PRODUCT: "/product/:productSlug",
+  SEARCH: "/search",
+  LOGIN: "/login",
+  REGISTER: "/register",
+  FORGOT_PASSWORD: "/forgot-password",
+  RESET_PASSWORD: "/reset-password",
+  SAVED: "/saved",
+  ACCOUNT: "/account",
+  SHOPS: "/shops",
+  CATEGORIES: "/categories",
+  ABOUT: "/about",
+  TERMS: "/terms",
+  PRIVACY: "/privacy",
+  FAQ: "/faq",
+  HELP: "/help",
+  FEEDBACK: "/feedback",
+
+  DASHBOARD: "/dashboard",
+  DASHBOARD_SHOP: "/dashboard/shop",
+  DASHBOARD_PRODUCTS: "/dashboard/products",
+  DASHBOARD_PRODUCT_NEW: "/dashboard/products/new",
+  DASHBOARD_PRODUCT_EDIT: "/dashboard/products/:id/edit",
+  DASHBOARD_GALLERY: "/dashboard/gallery",
+  DASHBOARD_VERIFICATION: "/dashboard/verification",
+  DASHBOARD_ANALYTICS: "/dashboard/analytics",
+
+  ADMIN: "/admin",
+  ADMIN_USERS: "/admin/users",
+  ADMIN_CREDENTIALS: "/admin/credentials",
+  ADMIN_SELLERS: "/admin/sellers",
+  ADMIN_VERIFICATIONS: "/admin/verifications",
+  ADMIN_CATEGORIES: "/admin/categories",
+  ADMIN_PRODUCTS: "/admin/products",
+  ADMIN_BANNERS: "/admin/banners",
+  ADMIN_SETTINGS: "/admin/settings",
+  ADMIN_CMS: "/admin/cms",
+};
+
+export const categoryPath = (slug) => `/category/${slug}`;
+export const shopPath = (slug) => `/shop/${slug}`;
+export const productPath = (slug) => `/product/${slug}`;
+export const editProductPath = (id) => `/dashboard/products/${id}/edit`;
