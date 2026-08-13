@@ -21,6 +21,8 @@ export const ROUTES = {
   FEEDBACK: "/feedback",
 
   DASHBOARD: "/dashboard",
+  DASHBOARD_PERSONAL: "/dashboard/personal-details",
+  DASHBOARD_SETTINGS: "/dashboard/settings",
   PATIENT_DASHBOARD: "/patient/dashboard",
   DASHBOARD_SHOP: "/dashboard/shop",
   DASHBOARD_WEBSITE: "/dashboard/website-builder",
@@ -34,6 +36,8 @@ export const ROUTES = {
   APPOINTMENTS: "/appointments",
 
   ADMIN: "/admin",
+  ADMIN_PERSONAL: "/admin/personal-details",
+  ADMIN_SETTINGS: "/admin/settings",
   ADMIN_USERS: "/admin/users",
   ADMIN_CREDENTIALS: "/admin/credentials",
   ADMIN_SELLERS: "/admin/sellers",
@@ -41,7 +45,6 @@ export const ROUTES = {
   ADMIN_CATEGORIES: "/admin/categories",
   ADMIN_PRODUCTS: "/admin/products",
   ADMIN_BANNERS: "/admin/banners",
-  ADMIN_SETTINGS: "/admin/settings",
   ADMIN_CMS: "/admin/cms",
 };
 

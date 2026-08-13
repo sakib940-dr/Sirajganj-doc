@@ -5,6 +5,7 @@ import AdminLayout from "@/layouts/AdminLayout.jsx";
 import ProtectedRoute from "@/components/auth/ProtectedRoute.jsx";
 import { ROUTES } from "@/constants/routes";
 import { ROLES } from "@/constants/roles";
+import { useAuth } from "@/hooks/useAuth";
 
 // Public
 import HomePage from "@/pages/public/HomePage.jsx";
@@ -20,7 +21,6 @@ import RegisterPage from "@/pages/public/RegisterPage.jsx";
 import ForgotPasswordPage from "@/pages/public/ForgotPasswordPage.jsx";
 import ResetPasswordPage from "@/pages/public/ResetPasswordPage.jsx";
 import SavedItemsPage from "@/pages/public/SavedItemsPage.jsx";
-import AccountPage from "@/pages/public/AccountPage.jsx";
 import AboutPage from "@/pages/public/AboutPage.jsx";
 import TermsPage from "@/pages/public/TermsPage.jsx";
 import PrivacyPage from "@/pages/public/PrivacyPage.jsx";
@@ -29,6 +29,9 @@ import HelpPage from "@/pages/public/HelpPage.jsx";
 import FeedbackPage from "@/pages/public/FeedbackPage.jsx";
 import PatientAppointmentsPage from "@/pages/public/AppointmentsPage.jsx";
 import PatientDashboardPage from "@/pages/public/PatientDashboardPage.jsx";
+import SettingsPage from "@/pages/shared/SettingsPage.jsx";
+import PersonalDetailsPage from "@/pages/shared/PersonalDetailsPage.jsx";
+import AccountPage from "@/pages/public/AccountPage.jsx";
 import NotFoundPage from "@/pages/public/NotFoundPage.jsx";
 
 // Seller
@@ -53,12 +56,26 @@ import ProductManagePage from "@/pages/admin/ProductManagePage.jsx";
 import BannerManagePage from "@/pages/admin/BannerManagePage.jsx";
 import CMSPage from "@/pages/admin/cms/CMSPage.jsx";
 
+function RoleAwareHome() {
+  const { role } = useAuth();
+  if (role === ROLES.ADMIN || role === ROLES.SUPER_ADMIN) return <Navigate to={ROUTES.ADMIN} replace />;
+  if (role === ROLES.DOCTOR || role === ROLES.HOSPITAL) return <Navigate to={ROUTES.DASHBOARD} replace />;
+  return <HomePage />;
+}
+
+function RoleAwareAccountRedirect() {
+  const { role } = useAuth();
+  if (role === ROLES.ADMIN || role === ROLES.SUPER_ADMIN) return <Navigate to={ROUTES.ADMIN_PERSONAL} replace />;
+  if (role === ROLES.DOCTOR || role === ROLES.HOSPITAL) return <Navigate to={ROUTES.DASHBOARD_PERSONAL} replace />;
+  return <AccountPage />;
+}
+
 export default function AppRoutes() {
   return (
     <Routes>
       {/* Public */}
       <Route element={<MainLayout />}>
-        <Route path={ROUTES.HOME} element={<HomePage />} />
+        <Route path={ROUTES.HOME} element={<RoleAwareHome />} />
         <Route path={ROUTES.CATEGORIES} element={<CategoriesListPage />} />
         <Route path={ROUTES.CATEGORY} element={<CategoryPage />} />
         <Route path={ROUTES.SHOPS} element={<ShopsListPage />} />
@@ -89,7 +106,7 @@ export default function AppRoutes() {
           path={ROUTES.ACCOUNT}
           element={
             <ProtectedRoute>
-              <AccountPage />
+              <RoleAwareAccountRedirect />
             </ProtectedRoute>
           }
         />
@@ -125,6 +142,8 @@ export default function AppRoutes() {
         }
       >
         <Route path={ROUTES.DASHBOARD} element={<DashboardHome />} />
+        <Route path={ROUTES.DASHBOARD_PERSONAL} element={<PersonalDetailsPage />} />
+        <Route path={ROUTES.DASHBOARD_SETTINGS} element={<SettingsPage />} />
         <Route path={ROUTES.DASHBOARD_SHOP} element={<ShopSettingsPage />} />
         <Route path={ROUTES.DASHBOARD_WEBSITE} element={<WebsiteBuilderPage />} />
         <Route path={ROUTES.DASHBOARD_PRODUCTS} element={<ProductListPage />} />
@@ -145,6 +164,8 @@ export default function AppRoutes() {
         }
       >
         <Route path={ROUTES.ADMIN} element={<AdminDashboard />} />
+        <Route path={ROUTES.ADMIN_PERSONAL} element={<PersonalDetailsPage />} />
+        <Route path={ROUTES.ADMIN_SETTINGS} element={<SettingsPage />} />
         <Route
           path={ROUTES.ADMIN_USERS}
           element={
@@ -182,7 +203,7 @@ export default function AppRoutes() {
           }
         />
         {/* পুরনো /admin/settings লিংক (বুকমার্ক/ইতিহাস) নতুন CMS প্যানেলে পাঠিয়ে দেওয়া হয় */}
-        <Route path={ROUTES.ADMIN_SETTINGS} element={<Navigate to={ROUTES.ADMIN_CMS} replace />} />
+
       </Route>
 
       <Route path="*" element={<NotFoundPage />} />

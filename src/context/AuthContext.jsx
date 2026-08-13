@@ -86,7 +86,12 @@ export function AuthProvider({ children }) {
   };
 
   const signOut = async () => {
-    await supabase.auth.signOut();
+    const { error } = await supabase.auth.signOut();
+    // লগআউটের পর সব role-কে visitor homepage-এ ফেরত পাঠানো হবে।
+    if (!error && typeof window !== "undefined") {
+      window.location.assign("/");
+    }
+    return { error };
   };
 
   const sendPasswordResetEmail = async (email) => {

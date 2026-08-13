@@ -10,7 +10,6 @@ import {
   Package,
   GalleryHorizontal,
   Palette,
-  ArrowLeft,
   Menu,
   X,
   LogOut,
@@ -114,18 +113,18 @@ export default function AdminLayout() {
               </div>
             </div>
             <Link
-              to={ROUTES.ACCOUNT}
+              to={ROUTES.ADMIN_PERSONAL}
               className="flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-primary-foreground/75 transition-colors hover:bg-primary-foreground/10 hover:text-primary-foreground"
             >
               <KeyRound className="h-4 w-4" />
-              পাসওয়ার্ড পরিবর্তন
+              ব্যক্তিগত তথ্য
             </Link>
             <Link
-              to={ROUTES.HOME}
+              to={ROUTES.ADMIN_SETTINGS}
               className="flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-primary-foreground/75 transition-colors hover:bg-primary-foreground/10 hover:text-primary-foreground"
             >
-              <ArrowLeft className="h-4 w-4" />
-              মূল সাইটে ফিরুন
+              <Palette className="h-4 w-4" />
+              সেটিংস
             </Link>
             <button
               type="button"
@@ -179,20 +178,20 @@ export default function AdminLayout() {
             </div>
             <div className="border-t border-primary-foreground/10 p-3">
               <Link
-                to={ROUTES.ACCOUNT}
+                to={ROUTES.ADMIN_PERSONAL}
                 onClick={() => setDrawerOpen(false)}
                 className="flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-primary-foreground/75 hover:bg-primary-foreground/10 hover:text-primary-foreground"
               >
                 <KeyRound className="h-4 w-4" />
-                পাসওয়ার্ড পরিবর্তন
+                ব্যক্তিগত তথ্য
               </Link>
               <Link
-                to={ROUTES.HOME}
+                to={ROUTES.ADMIN_SETTINGS}
                 onClick={() => setDrawerOpen(false)}
                 className="flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-primary-foreground/75 hover:bg-primary-foreground/10 hover:text-primary-foreground"
               >
-                <ArrowLeft className="h-4 w-4" />
-                মূল সাইটে ফিরুন
+                <Palette className="h-4 w-4" />
+                সেটিংস
               </Link>
               <button
                 type="button"

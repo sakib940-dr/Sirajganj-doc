@@ -50,6 +50,11 @@ export default function Header() {
 
   const displayName = profile?.full_name?.trim() || "আমার অ্যাকাউন্ট";
   const avatarInitial = (profile?.full_name?.trim()?.charAt(0) || "ব").toUpperCase();
+  const brandTarget = !isLoggedIn || role === ROLES.PATIENT
+    ? ROUTES.HOME
+    : isAdminOrAbove(role)
+      ? ROUTES.ADMIN
+      : ROUTES.DASHBOARD;
 
   return (
     <header className="sticky top-0 z-40 border-b border-border bg-background/95 shadow-sm backdrop-blur supports-[backdrop-filter]:bg-background/80">
@@ -70,7 +75,7 @@ export default function Header() {
         </button>
 
         {/* লোগো/ব্র্যান্ড */}
-        <Link to={ROUTES.HOME} className="flex shrink-0 items-center gap-2">
+        <Link to={brandTarget} className="flex shrink-0 items-center gap-2">
           {settings.site_logo_url ? (
             <img
               src={settings.site_logo_url}
@@ -146,7 +151,7 @@ export default function Header() {
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
-                    <Link to={ROUTES.ACCOUNT}>
+                    <Link to={role === ROLES.PATIENT ? ROUTES.ACCOUNT : isAdminOrAbove(role) ? ROUTES.ADMIN_PERSONAL : ROUTES.DASHBOARD_PERSONAL}>
                       <KeyRound className="h-4 w-4 text-muted-foreground" />
                       প্রোফাইল / পাসওয়ার্ড
                     </Link>

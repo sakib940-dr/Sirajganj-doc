@@ -13,6 +13,9 @@ import {
   ShieldQuestion,
   Sparkles,
   ChevronRight,
+  Store,
+  Globe2,
+  Settings,
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useMobileMenu } from "@/context/MobileMenuContext.jsx";
@@ -52,6 +55,8 @@ export default function MobileSideMenu() {
 
   const displayName = profile?.full_name?.trim() || "আমার অ্যাকাউন্ট";
   const avatarInitial = (profile?.full_name?.trim()?.charAt(0) || "ব").toUpperCase();
+  const isStaff = isAdminOrAbove(role) || role === ROLES.DOCTOR || role === ROLES.HOSPITAL;
+  const personalRoute = role === ROLES.PATIENT ? ROUTES.ACCOUNT : isAdminOrAbove(role) ? ROUTES.ADMIN_PERSONAL : ROUTES.DASHBOARD_PERSONAL;
 
   if (!isOpen) return null;
 
@@ -80,7 +85,7 @@ export default function MobileSideMenu() {
           {/* উপরে — লগইন / প্রোফাইল কার্ড */}
           {isLoggedIn ? (
             <Link
-              to={ROUTES.ACCOUNT}
+              to={personalRoute}
               onClick={close}
               className="mb-3 flex items-center gap-3 rounded-xl bg-secondary/60 px-3 py-3"
             >
@@ -120,33 +125,32 @@ export default function MobileSideMenu() {
             </Link>
           )}
 
-          {/* Dashboard/Admin — শুধু প্রাসঙ্গিক রোলের জন্য, Bottom Nav-এ যা নেই */}
-          {isLoggedIn && (isAdminOrAbove(role) || role === ROLES.DOCTOR) && (
+          {isStaff ? (
             <>
-              <div className="mb-1 space-y-0.5">
+              <div className="space-y-0.5">
+                <MenuLink to={personalRoute} icon={User} label="ব্যক্তিগত তথ্য" onClick={close} />
+                {(role === ROLES.DOCTOR || role === ROLES.HOSPITAL) && (
+                  <>
+                    <MenuLink to={ROUTES.DASHBOARD_SHOP} icon={Store} label="চেম্বার" onClick={close} />
+                    <MenuLink to={ROUTES.DASHBOARD_WEBSITE} icon={Globe2} label="ওয়েবসাইট" onClick={close} />
+                  </>
+                )}
                 {isAdminOrAbove(role) && (
                   <MenuLink to={ROUTES.ADMIN} icon={ShieldCheck} label="অ্যাডমিন প্যানেল" onClick={close} />
                 )}
-                <MenuLink
-                  to={ROUTES.DASHBOARD}
-                  icon={LayoutDashboard}
-                  label={role === ROLES.DOCTOR ? "ডাক্তার ড্যাশবোর্ড" : "ড্যাশবোর্ড"}
-                  onClick={close}
-                />
+                <MenuLink to={isAdminOrAbove(role) ? ROUTES.ADMIN_SETTINGS : ROUTES.DASHBOARD_SETTINGS} icon={Settings} label="সেটিংস" onClick={close} />
               </div>
-              <div className="my-2 border-t border-border" />
             </>
+          ) : (
+            <div className="space-y-0.5">
+              <MenuLink to={ROUTES.HELP} icon={HelpCircle} label="সাহায্য" onClick={close} />
+              <MenuLink to={ROUTES.ABOUT} icon={Info} label="আমাদের সম্পর্কে" onClick={close} />
+              <MenuLink to={ROUTES.FEEDBACK} icon={MessageSquareHeart} label="মতামত জানান" onClick={close} />
+              <MenuLink to={ROUTES.FAQ} icon={ShieldQuestion} label="সচরাচর জিজ্ঞাসিত প্রশ্ন" onClick={close} />
+              <MenuLink to={ROUTES.TERMS} icon={ScrollText} label="শর্তাবলী" onClick={close} />
+              <MenuLink to={ROUTES.PRIVACY} icon={ScrollText} label="প্রাইভেসি পলিসি" onClick={close} />
+            </div>
           )}
-
-          {/* মাঝে — সাহায্য/তথ্যমূলক লিংক */}
-          <div className="space-y-0.5">
-            <MenuLink to={ROUTES.HELP} icon={HelpCircle} label="সাহায্য" onClick={close} />
-            <MenuLink to={ROUTES.ABOUT} icon={Info} label="আমাদের সম্পর্কে" onClick={close} />
-            <MenuLink to={ROUTES.FEEDBACK} icon={MessageSquareHeart} label="মতামত জানান" onClick={close} />
-            <MenuLink to={ROUTES.FAQ} icon={ShieldQuestion} label="সচরাচর জিজ্ঞাসিত প্রশ্ন" onClick={close} />
-            <MenuLink to={ROUTES.TERMS} icon={ScrollText} label="শর্তাবলী" onClick={close} />
-            <MenuLink to={ROUTES.PRIVACY} icon={ScrollText} label="প্রাইভেসি পলিসি" onClick={close} />
-          </div>
 
           {/* নিচে — লগ আউট */}
           {isLoggedIn && (
