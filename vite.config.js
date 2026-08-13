@@ -13,9 +13,9 @@ export default defineConfig({
       registerType: "prompt",
       includeAssets: ["favicon.svg", "apple-touch-icon.png"],
       manifest: {
-        name: "বাজার — স্থানীয় দোকানের ঠিকানা",
-        short_name: "বাজার",
-        description: "আপনার এলাকার সব দোকান ও পণ্য একসাথে — বাজার",
+        name: "সিরাজগঞ্জ ডাক্তার — ডাক্তার ও স্বাস্থ্যসেবা",
+        short_name: "সিরাজগঞ্জ ডাক্তার",
+        description: "সিরাজগঞ্জের ডাক্তার, চেম্বার, হাসপাতাল, রক্তদাতা ও অ্যাম্বুলেন্স খুঁজুন।",
         lang: "bn",
         start_url: "/",
         scope: "/",

@@ -30,7 +30,7 @@ import FeedbackPage from "@/pages/public/FeedbackPage.jsx";
 import BloodBankPage from "@/pages/public/BloodBankPage.jsx";
 import AmbulancePage from "@/pages/public/AmbulancePage.jsx";
 import BloodDonorPage from "@/pages/public/BloodDonorPage.jsx";
-import PatientAppointmentsPage from "@/pages/public/PatientAppointmentsPage.jsx";
+import PatientAppointmentsPage from "@/pages/public/PatientAppointments.jsx";
 import PatientDashboardPage from "@/pages/public/PatientDashboardPage.jsx";
 import SettingsPage from "@/pages/shared/SettingsPage.jsx";
 import PersonalDetailsPage from "@/pages/shared/PersonalDetailsPage.jsx";

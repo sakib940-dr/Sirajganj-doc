@@ -29,11 +29,11 @@ export default function InstallPromptBanner() {
           <Download className="h-5 w-5" />
         </span>
         <div className="flex-1">
-          <p className="text-sm font-semibold text-foreground">বাজার অ্যাপ ইনস্টল করুন</p>
+          <p className="text-sm font-semibold text-foreground">সিরাজগঞ্জ ডাক্তার অ্যাপ ইনস্টল করুন</p>
 
           {isIOS ? (
             <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
-              হোম স্ক্রিনে যোগ করতে নিচের শেয়ার <Share className="inline h-3.5 w-3.5 align-text-bottom" /> বাটনে ট্যাপ
+              সিরাজগঞ্জ ডাক্তার হোম স্ক্রিনে যোগ করতে নিচের শেয়ার <Share className="inline h-3.5 w-3.5 align-text-bottom" /> বাটনে ট্যাপ
               করে <span className="font-medium text-foreground">"Add to Home Screen"</span> নির্বাচন করুন।
             </p>
           ) : (
