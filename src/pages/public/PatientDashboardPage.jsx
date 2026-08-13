@@ -15,7 +15,7 @@ function IncomingBloodRequests({ requests, loading, refresh }) {
   </div>;
 }
 
-function PatientDashboardPage() {
+export default function PatientDashboardPage() {
   const { profile, user, signOut } = useAuth();
   const { requests, loading: bloodLoading } = useBloodRequests({ userId: user?.id, role: "patient" });
   const { requests: incomingBloodRequests, loading: incomingLoading, refresh: refreshIncoming } = useBloodRequests({ userId: user?.id, role: "patient", mode: "donor", enabled: !!profile?.blood_donor_volunteer });
