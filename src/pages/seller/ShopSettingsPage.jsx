@@ -18,7 +18,7 @@ const EMPTY = {
   shop_name: "", slug: "", logo_url: "", banner_url: "", about: "",
   phone: "", whatsapp_number: "", address: "", google_map_link: "",
   facebook_link: "", messenger_link: "", chamber_name: "", chamber_type: "", district: "সিরাজগঞ্জ", upazila: "",
-  latitude: "", longitude: "",
+  latitude: "", longitude: "", hospital_photo_urls: [],
   visiting_days: "", visiting_time: "", consultation_fee: "", assistant_phone: ""
 };
 
@@ -134,6 +134,20 @@ export default function ShopSettingsPage() {
             </div>
           </CardContent>
         </Card>
+
+        {role === "hospital" && (
+          <Card>
+            <CardHeader className="pb-3"><CardTitle className="text-base">হাসপাতালের প্রোফাইল ছবি</CardTitle><CardDescription>এখানে আপনার হাসপাতালের প্রোফাইল/ভবনের সর্বোচ্চ ৪টি ছবি আপলোড করুন। রোগীরা হাসপাতালের পেজ খুললে ছবিগুলো সবার উপরে বড় করে দেখতে পারবে। প্রতিটি ছবি সর্বোচ্চ ১ MB; সিস্টেম স্বয়ংক্রিয়ভাবে কমপ্রেস করবে।</CardDescription></CardHeader>
+            <CardContent className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+              {Array.from({length:4}).map((_,i)=>(
+                <div key={i}>
+                  <p className="mb-1 text-xs font-semibold text-muted-foreground">ছবি {i+1}</p>
+                  <ImageUploader bucket="shop-banners" folder={`${user.id}/hospital`} value={shop.hospital_photo_urls?.[i] || ""} onUploaded={url=>{ const next=[...(shop.hospital_photo_urls||[])]; next[i]=url; update("hospital_photo_urls",next); }} aspect="wide" maxSizeKB={1024} />
+                </div>
+              ))}
+            </CardContent>
+          </Card>
+        )}
 
         <Card>
           <CardHeader><CardTitle className="text-base">{role === "hospital" ? "চেম্বার / হাসপাতালের তথ্য" : "চেম্বারের তথ্য"}</CardTitle></CardHeader>

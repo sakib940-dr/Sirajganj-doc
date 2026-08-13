@@ -1,4 +1,6 @@
-import { Clock, XCircle } from "lucide-react";
+import { Clock, XCircle, ShieldCheck } from "lucide-react";
+import { Link } from "react-router-dom";
+import { ROUTES } from "@/constants/routes";
 import { SELLER_STATUS } from "@/constants/roles";
 
 export default function PendingApprovalNotice({ status }) {
@@ -20,6 +22,9 @@ export default function PendingApprovalNotice({ status }) {
           ? "বিস্তারিত জানতে অনুগ্রহ করে অ্যাডমিনের সাথে যোগাযোগ করুন।"
           : "অ্যাডমিন আপনার আবেদন যাচাই করছেন। অনুমোদন হলে আপনি চেম্বার ও ডাক্তার প্রোফাইল ম্যানেজ করতে পারবেন।"}
       </p>
+      <Link to={ROUTES.DASHBOARD_VERIFICATION} className="mt-2 inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground">
+        <ShieldCheck className="h-4 w-4" /> ভেরিফিকেশন করুন
+      </Link>
     </div>
   );
 }

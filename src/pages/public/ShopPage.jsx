@@ -74,6 +74,18 @@ export default function ShopPage() {
         {shop.banner_url && <img src={shop.banner_url} alt="" className="h-full w-full object-cover" />}
       </div>
 
+      {shop.hospital_photo_urls?.filter(Boolean)?.length > 0 && (
+        <div className="container pt-4">
+          <div className="grid grid-cols-2 gap-2 overflow-hidden rounded-2xl md:grid-cols-4">
+            {shop.hospital_photo_urls.filter(Boolean).slice(0,4).map((url,i)=>(
+              <a key={url} href={url} target="_blank" rel="noreferrer" className={`${i===0 ? "col-span-2 row-span-2" : ""} block overflow-hidden rounded-xl bg-secondary`}>
+                <img src={url} alt={`${shop.shop_name} ছবি ${i+1}`} className="h-full min-h-32 w-full object-cover transition hover:scale-[1.02]" />
+              </a>
+            ))}
+          </div>
+        </div>
+      )}
+
       <div className="container -mt-12 pb-16">
         <div className="flex flex-col items-start gap-4 rounded-xl border border-border bg-card p-6 shadow-sm md:flex-row md:items-center">
           <div className="flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-xl border-4 border-card bg-primary text-primary-foreground shadow">

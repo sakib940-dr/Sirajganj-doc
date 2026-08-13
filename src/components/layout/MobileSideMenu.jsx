@@ -135,6 +135,7 @@ export default function MobileSideMenu() {
                   <>
                     <MenuLink to={ROUTES.DASHBOARD_SHOP} icon={Store} label="চেম্বার" onClick={close} />
                     <MenuLink to={ROUTES.DASHBOARD_WEBSITE} icon={Globe2} label="ওয়েবসাইট" onClick={close} />
+                    <MenuLink to={ROUTES.DASHBOARD_VERIFICATION} icon={ShieldCheck} label="ভেরিফিকেশন করুন" onClick={close} />
                   </>
                 )}
                 {isAdminOrAbove(role) && (
