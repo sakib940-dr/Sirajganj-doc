@@ -21,9 +21,9 @@ export default function AppointmentsPage() {
 
   if(loading) return <LoadingSpinner fullScreen label="Appointment লোড হচ্ছে..."/>;
   return <div className="space-y-5">
-    <div><h1 className="text-xl font-bold">অ্যাপয়েন্টমেন্ট</h1><p className="text-sm text-muted-foreground">আপনার কাছে আসা রোগীর appointment request</p></div>
+    <div><h1 className="text-xl font-bold">অ্যাপয়েন্টমেন্ট</h1><p className="text-sm text-muted-foreground">আপনার কাছে আসা রোগীর অ্যাপয়েন্টমেন্ট অনুরোধ</p></div>
     {error&&<div className="rounded-xl bg-destructive/10 p-3 text-sm text-destructive">{error}</div>}
-    {!appointments.length&&<div className="rounded-2xl border p-8 text-center text-sm text-muted-foreground">এখনো কোনো appointment request নেই।</div>}
+    {!appointments.length&&<div className="rounded-2xl border p-8 text-center text-sm text-muted-foreground">এখনো কোনো অ্যাপয়েন্টমেন্ট অনুরোধ নেই।</div>}
     <div className="space-y-3">
       {appointments.map(a=><div key={a.id} className="rounded-2xl border bg-card p-4">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
@@ -35,8 +35,8 @@ export default function AppointmentsPage() {
           </div>
           <span className="rounded-full bg-secondary px-3 py-1 text-xs font-medium">{labels[a.status]||a.status}</span>
         </div>
-        {a.status==="pending"&&<div className="mt-4 flex gap-2"><button disabled={busy===a.id} onClick={()=>change(a,"confirmed")} className="inline-flex items-center gap-1 rounded-xl bg-primary px-3 py-2 text-sm font-semibold text-primary-foreground"><CheckCircle2 className="h-4 w-4"/> Confirm</button><button disabled={busy===a.id} onClick={()=>change(a,"cancelled")} className="inline-flex items-center gap-1 rounded-xl border px-3 py-2 text-sm font-semibold"><XCircle className="h-4 w-4"/> Reject</button></div>}
-        {a.status==="confirmed"&&<button disabled={busy===a.id} onClick={()=>change(a,"completed")} className="mt-4 rounded-xl border px-3 py-2 text-sm font-semibold">Mark as completed</button>}
+        {a.status==="pending"&&<div className="mt-4 flex gap-2"><button disabled={busy===a.id} onClick={()=>change(a,"confirmed")} className="inline-flex items-center gap-1 rounded-xl bg-primary px-3 py-2 text-sm font-semibold text-primary-foreground"><CheckCircle2 className="h-4 w-4"/> নিশ্চিত করুন</button><button disabled={busy===a.id} onClick={()=>change(a,"cancelled")} className="inline-flex items-center gap-1 rounded-xl border px-3 py-2 text-sm font-semibold"><XCircle className="h-4 w-4"/> প্রত্যাখ্যান করুন</button></div>}
+        {a.status==="confirmed"&&<button disabled={busy===a.id} onClick={()=>change(a,"completed")} className="mt-4 rounded-xl border px-3 py-2 text-sm font-semibold">সম্পন্ন হিসেবে চিহ্নিত করুন</button>}
       </div>)}
     </div>
   </div>;

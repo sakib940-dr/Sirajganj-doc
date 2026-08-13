@@ -75,6 +75,22 @@ export default function CredentialsPage() {
         <p className="text-sm text-muted-foreground">শুধুমাত্র নির্দিষ্ট Admin এই পেজ দেখতে পারবেন</p>
       </div>
 
+      <div className="rounded-2xl border border-primary/20 bg-primary/5 p-4">
+        <h2 className="font-semibold">সুপার অ্যাডমিন লগইন সেটআপ</h2>
+        <p className="mt-1 text-sm text-muted-foreground">
+          সুপার অ্যাডমিনের ইমেইল/পাসওয়ার্ড Supabase Authentication-এ তৈরি হবে। পাসওয়ার্ড অ্যাপে বা ডাটাবেসে সংরক্ষণ করা হয় না।
+        </p>
+        <pre className="mt-3 overflow-x-auto rounded-xl bg-card p-3 text-xs leading-relaxed">{`UPDATE public.profiles
+SET role = 'super_admin', seller_status = 'approved'
+WHERE id = (
+  SELECT id FROM auth.users
+  WHERE email = 'YOUR_SUPER_ADMIN_EMAIL'
+);`}</pre>
+        <p className="mt-2 text-xs text-muted-foreground">
+          প্রথমবার account তৈরি করার পর এই SQL একবার চালালেই ওই account Super Admin হবে।
+        </p>
+      </div>
+
       <div className="flex items-start gap-3 rounded-xl border border-accent/30 bg-accent/10 p-4 text-sm">
         <ShieldAlert className="mt-0.5 h-5 w-5 shrink-0 text-accent" />
         <p>

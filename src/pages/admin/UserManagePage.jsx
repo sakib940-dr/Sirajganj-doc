@@ -31,6 +31,7 @@ const ROLE_BADGE_CLASS = {
   [ROLES.SUPER_ADMIN]: "bg-primary/10 text-primary",
   [ROLES.ADMIN]: "bg-accent/15 text-accent",
   [ROLES.DOCTOR]: "bg-secondary text-foreground/80",
+  [ROLES.HOSPITAL]: "bg-accent/10 text-accent",
   [ROLES.PATIENT]: "bg-muted text-muted-foreground",
 };
 
@@ -39,7 +40,7 @@ const ROLE_BADGE_CLASS = {
 // এটি ব্লক করা আছে — দেখুন 0018_super_admin_singleton.sql)। নিজের
 // অ্যাকাউন্ট (অর্থাৎ একমাত্র বিদ্যমান Super Admin) এই প্যানেল থেকে এডিট
 // করা যায় না, তাই এই তালিকায় SUPER_ADMIN থাকারও দরকার নেই।
-const ROLE_OPTIONS = [ROLES.PATIENT, ROLES.DOCTOR, ROLES.ADMIN];
+const ROLE_OPTIONS = [ROLES.PATIENT, ROLES.DOCTOR, ROLES.HOSPITAL, ROLES.ADMIN];
 
 export default function UserManagePage() {
   const { user: currentUser, role: myRole } = useAuth();
@@ -113,6 +114,19 @@ export default function UserManagePage() {
       return;
     }
     patchLocal(selected.id, { role: newRole });
+  };
+
+  const updateProviderStatus = async (status) => {
+    if (!selected || ![ROLES.DOCTOR, ROLES.HOSPITAL].includes(selected.role)) return;
+    setBusy(true);
+    setActionError("");
+    const { error } = await supabase.from("profiles").update({ seller_status: status }).eq("id", selected.id);
+    setBusy(false);
+    if (error) {
+      setActionError(error.message);
+      return;
+    }
+    patchLocal(selected.id, { seller_status: status });
   };
 
   const toggleBan = async () => {
@@ -355,6 +369,15 @@ export default function UserManagePage() {
                         ))}
                       </select>
                     </div>
+                    {(selected.role === ROLES.DOCTOR || selected.role === ROLES.HOSPITAL) && (
+                      <div className="rounded-xl border border-border bg-secondary/30 p-3">
+                        <p className="mb-2 text-xs font-medium">প্রোভাইডার অনুমোদন: <strong>{selected.seller_status === "approved" ? "অনুমোদিত" : selected.seller_status === "rejected" ? "প্রত্যাখ্যাত" : "অপেক্ষমাণ"}</strong></p>
+                        <div className="flex flex-wrap gap-2">
+                          <Button size="sm" disabled={busy} onClick={() => updateProviderStatus("approved")}>অনুমোদন করুন</Button>
+                          <Button size="sm" variant="outline" disabled={busy} onClick={() => updateProviderStatus("rejected")}>প্রত্যাখ্যান করুন</Button>
+                        </div>
+                      </div>
+                    )}
                     <div className="flex flex-wrap gap-2">
                       <Button size="sm" variant="outline" disabled={busy} onClick={toggleBan}>
                         {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : selected.account_status === ACCOUNT_STATUS.BANNED ? (

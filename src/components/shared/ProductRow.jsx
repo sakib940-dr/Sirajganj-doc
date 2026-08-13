@@ -61,7 +61,7 @@ export default function ProductRow({
         <div className="container">
           <div className="no-scrollbar -mx-4 flex gap-3 overflow-x-auto px-4 pb-1">
             {Array.from({ length: 5 }).map((_, i) => (
-              <ProductCardSkeleton key={i} className="w-[8.5rem] shrink-0 sm:w-40 md:w-44" />
+              <ProductCardSkeleton key={i} className="w-[13rem] shrink-0 sm:w-[15rem] md:w-[17rem]" />
             ))}
           </div>
         </div>

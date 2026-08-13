@@ -39,11 +39,11 @@ export default function ProtectedRoute({ children, requiredRole, allowPendingDoc
   }
 
   if (requiredRole === ROLES.DOCTOR) {
-    const isDoctorOrAdmin = role === ROLES.DOCTOR || isAdminOrAbove(role);
-    if (!isDoctorOrAdmin) {
+    const isDoctorOrHospitalOrAdmin = role === ROLES.DOCTOR || role === ROLES.HOSPITAL || isAdminOrAbove(role);
+    if (!isDoctorOrHospitalOrAdmin) {
       return <Navigate to={ROUTES.HOME} replace />;
     }
-    if (role === ROLES.DOCTOR && doctorStatus !== "approved" && !(allowPendingDoctor || allowPendingSeller)) {
+    if ((role === ROLES.DOCTOR || role === ROLES.HOSPITAL) && doctorStatus !== "approved" && !(allowPendingDoctor || allowPendingSeller)) {
       return <Navigate to={ROUTES.DASHBOARD} replace />;
     }
   }

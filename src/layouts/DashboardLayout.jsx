@@ -27,7 +27,7 @@ const navItems = [
 ];
 
 export default function DashboardLayout() {
-  const { profile, signOut } = useAuth();
+  const { profile, role, signOut } = useAuth();
   const [drawerOpen, setDrawerOpen] = useState(false);
 
   return (
@@ -88,7 +88,7 @@ export default function DashboardLayout() {
         >
           <div className="flex h-14 items-center justify-between border-b border-border px-4">
             <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-              ডাক্তার ড্যাশবোর্ড
+              {role === "hospital" ? "চেম্বার/হাসপাতাল ড্যাশবোর্ড" : "ডাক্তার ড্যাশবোর্ড"}
             </p>
             <button
               type="button"
@@ -140,7 +140,7 @@ export default function DashboardLayout() {
 
       <div className="container flex flex-col gap-6 py-6 pb-24 md:flex-row md:pb-6">
         <div className="hidden md:block">
-          <Sidebar items={navItems} title="ডাক্তার ড্যাশবোর্ড" />
+          <Sidebar items={navItems} title={role === "hospital" ? "চেম্বার/হাসপাতাল ড্যাশবোর্ড" : "ডাক্তার ড্যাশবোর্ড"} />
         </div>
         <div className="min-w-0 flex-1">
           <Outlet />

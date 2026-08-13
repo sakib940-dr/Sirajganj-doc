@@ -16,7 +16,7 @@ import { ROUTES } from "@/constants/routes";
 import { ROLES, SELLER_STATUS, isAdminOrAbove } from "@/constants/roles";
 
 const EMPTY = {
-  name:"", slug:"", category_id:"", price:"", description:"", thumbnail_url:"",
+  doctor_id:"", name:"", slug:"", category_id:"", price:"", description:"", thumbnail_url:"",
   is_active:true, name_en:"", name_bn:"", search_keywords:"",
   degree:"", designation:"", bmdc_registration_no:"", consultation_fee:"",
   visiting_days:"", visiting_time:""
@@ -33,8 +33,9 @@ export default function ProductEditPage({ embedded = false }) {
   const navigate = useNavigate();
   const { user, role, sellerStatus } = useAuth();
   const { categories } = useCategories();
-  const approved = isAdminOrAbove(role) || (role === ROLES.DOCTOR && sellerStatus === SELLER_STATUS.APPROVED);
+  const approved = isAdminOrAbove(role) || ([ROLES.DOCTOR, ROLES.HOSPITAL].includes(role) && sellerStatus === SELLER_STATUS.APPROVED);
   const [shopId,setShopId]=useState(null);
+  const [approvedDoctors,setApprovedDoctors]=useState([]);
   const [product,setProduct]=useState(EMPTY);
   const [extraImages,setExtraImages]=useState([]);
   const [loading,setLoading]=useState(true);
@@ -47,6 +48,10 @@ export default function ProductEditPage({ embedded = false }) {
     async function load(){
       const {data:shop}=await supabase.from("shops").select("id").eq("owner_id",user.id).maybeSingle();
       setShopId(shop?.id??null);
+      if(role === ROLES.HOSPITAL || role === ROLES.ADMIN || role === ROLES.SUPER_ADMIN){
+        const {data:docs}=await supabase.from("profiles").select("id,full_name").eq("role","doctor").eq("seller_status","approved").eq("account_status","active").order("full_name");
+        setApprovedDoctors(docs??[]);
+      }
       if(editing){
         const targetId = প্রোফাইলId || null;
         const {data}=await supabase.from("products").select("*").eq("id",targetId).single();
@@ -67,6 +72,7 @@ export default function ProductEditPage({ embedded = false }) {
     if(!product.name.trim() || !product.slug.trim()) return setError("ডাক্তারের নাম ও প্রোফাইল লিংক অবশ্যই দিতে হবে।");
     if(!product.thumbnail_url) return setError("ডাক্তার প্রোফাইল photo আবশ্যক।");
     if(!product.category_id) return setError("বিশেষত্ব নির্বাচন করুন।");
+    if(role !== ROLES.DOCTOR && !product.doctor_id) return setError("ডাক্তার নির্বাচন করুন।");
     if(!shopId) return setError("আগে Chamber Settings পূরণ করুন।");
     const fee=product.consultation_fee==="" ? Number(product.price||0) : Number(product.consultation_fee);
     if(fee<0) return setError("পরামর্শ ফি সঠিকভাবে দিন।");
@@ -75,12 +81,12 @@ export default function ProductEditPage({ embedded = false }) {
     const payload={
       name:product.name.trim(), slug:slugify(product.slug), category_id:product.category_id,
       price:fee, consultation_fee:fee, description:product.description||null,
-      thumbnail_url:product.thumbnail_url, প্রোফাইল_photo_url:product.thumbnail_url,
+      thumbnail_url:product.thumbnail_url, profile_photo_url:product.thumbnail_url,
       is_active:!!product.is_active, name_en:product.name_en||null, name_bn:product.name_bn||null,
       search_keywords:product.search_keywords||null, degree:product.degree||null,
       designation:product.designation||null, bmdc_registration_no:product.bmdc_registration_no||null,
       visiting_days:product.visiting_days||null, visiting_time:product.visiting_time||null,
-      shop_id:shopId, doctor_id:user.id
+      shop_id:shopId, doctor_id:(role === ROLES.DOCTOR ? user.id : product.doctor_id)
     };
     const result=editing
       ? await supabase.from("products").update(payload).eq("id",প্রোফাইলId).select().single()
@@ -119,7 +125,7 @@ export default function ProductEditPage({ embedded = false }) {
     </div>}
 
     <form onSubmit={submit} className="space-y-5">
-      <Card><CardHeader><CardTitle className="text-base">প্রোফাইল ছবি</CardTitle><CardDescription>১ MB পর্যন্ত ছবি দিন; upload-এর সময় 100–200 KB-এর মধ্যে compress হবে। সর্বোচ্চ ৪টি ছবি।</CardDescription></CardHeader>
+      <Card><CardHeader><CardTitle className="text-base">প্রোফাইল ছবি</CardTitle><CardDescription>১ MB পর্যন্ত ছবি দিন; আপলোডের সময় 100–200 KB-এর মধ্যে স্বয়ংক্রিয়ভাবে কমপ্রেস হবে। সর্বোচ্চ ৪টি ছবি।</CardDescription></CardHeader>
         <CardContent>
           <ImageUploader bucket="product-images" folder={user.id} value={product.thumbnail_url} onUploaded={u=>update("thumbnail_url",u)} maxSizeKB={MAX_KB} autoCompress compressTargetMinKB={MIN_COMPRESS_KB} compressTargetMaxKB={MAX_COMPRESS_KB}/>
           {editing && <div className="mt-4 flex flex-wrap gap-3">{extraImages.map(img=><div key={img.id} className="relative h-24 w-24 overflow-hidden rounded-lg border"><img src={img.image_url} className="h-full w-full object-cover"/><button type="button" onClick={()=>removeImage(img.id)} className="absolute right-1 top-1 rounded-full bg-destructive p-1 text-white"><X className="h-3 w-3"/></button></div>)}{extraImages.length<MAX_EXTRA_IMAGES&&<ImageUploader bucket="product-images" folder={user.id} value="" onUploaded={addImage} maxSizeKB={MAX_KB} autoCompress compressTargetMinKB={MIN_COMPRESS_KB} compressTargetMaxKB={MAX_COMPRESS_KB}/>}</div>}
@@ -127,6 +133,7 @@ export default function ProductEditPage({ embedded = false }) {
       </Card>
 
       <Card><CardHeader><CardTitle className="text-base">ডাক্তারের তথ্য</CardTitle></CardHeader><CardContent className="space-y-4">
+        {role !== ROLES.DOCTOR && <div><Label>ডাক্তার নির্বাচন করুন *</Label><select required value={product.doctor_id||""} onChange={e=>{const d=approvedDoctors.find(x=>x.id===e.target.value); update("doctor_id",e.target.value); if(d && !editing) nameChange(d.full_name||"");}} className="flex h-10 w-full rounded-lg border border-input bg-card px-3 text-sm"><option value="">অনুমোদিত ডাক্তার নির্বাচন করুন</option>{approvedDoctors.map(d=><option key={d.id} value={d.id}>{d.full_name}</option>)}</select><p className="mt-1 text-xs text-muted-foreground">চেম্বার/হাসপাতাল অ্যাকাউন্ট এখান থেকে অনুমোদিত ডাক্তারকে নিজের চেম্বারে যুক্ত করতে পারবে।</p></div>}
         <div><Label>ডাক্তারের নাম *</Label><Input required value={product.name} onChange={e=>nameChange(e.target.value)} /></div>
         <div><Label>প্রোফাইল লিংক *</Label><Input required value={product.slug} onChange={e=>{setSlugEdited(true);update("slug",e.target.value)}}/></div>
         <div className="grid gap-4 sm:grid-cols-2">

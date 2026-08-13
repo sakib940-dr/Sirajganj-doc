@@ -16,7 +16,7 @@ const DEFAULT_MAX_PRODUCTS_PER_SHOP = 50;
 export default function ProductListPage() {
   const { user, role, sellerStatus } = useAuth();
   const isApprovedSeller =
-    isAdminOrAbove(role) || (role === ROLES.DOCTOR && sellerStatus === SELLER_STATUS.APPROVED);
+    isAdminOrAbove(role) || ([ROLES.DOCTOR, ROLES.HOSPITAL].includes(role) && sellerStatus === SELLER_STATUS.APPROVED);
   const [products, setProducts] = useState([]);
   const [shopId, setShopId] = useState(null);
   const [maxProducts, setMaxProducts] = useState(DEFAULT_MAX_PRODUCTS_PER_SHOP);

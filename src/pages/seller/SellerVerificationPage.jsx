@@ -14,7 +14,7 @@ const EMPTY={full_name:"",profile_photo_url:"",phone:"",address:"",google_map_li
 nid_number:"",nid_front_url:"",nid_back_url:"",degree:"",specialty:"",designation:"",
 bmdc_registration_no:"",bmdc_document_url:"",chamber_name:"",chamber_address:"",
 visiting_days:"",visiting_time:"",consultation_fee:""};
-const PROFILE_MAX=2048, DOC_MAX=1024;
+const PROFILE_MAX=1024, DOC_MAX=1024;
 
 export default function SellerVerificationPage(){
   const {user,profile}=useAuth();
@@ -53,22 +53,22 @@ export default function SellerVerificationPage(){
 
     {status&&<div className={`flex items-center gap-3 rounded-xl border p-4 text-sm ${approved?"border-primary/30 bg-primary/10":rejected?"border-destructive/30 bg-destructive/10":"border-accent/40 bg-accent/10"}`}>
       {approved?<BadgeCheck className="h-5 w-5 text-primary"/>:rejected?<XCircle className="h-5 w-5 text-destructive"/>:<Clock className="h-5 w-5 text-accent"/>}
-      <span>Verification status: <b>{VERIFICATION_STATUS_LABEL_BN[status]}</b>{rejected&&note?` — ${note}`:""}</span>
+      <span>ভেরিফিকেশন অবস্থা: <b>{VERIFICATION_STATUS_LABEL_BN[status]}</b>{rejected&&note?` — ${note}`:""}</span>
     </div>}
 
     {rejected&&<Button variant="outline" onClick={()=>setStatus(null)}><RefreshCcw className="h-4 w-4"/> তথ্য সংশোধন করুন</Button>}
 
     <form onSubmit={submit} className="space-y-5">
-      <Card><CardHeader><CardTitle className="text-base">Personal Information</CardTitle></CardHeader><CardContent className="space-y-4">
+      <Card><CardHeader><CardTitle className="text-base">ব্যক্তিগত তথ্য</CardTitle></CardHeader><CardContent className="space-y-4">
         <div><Label>প্রোফাইল ছবি *</Label><ImageUploader bucket="seller-verification" folder={user.id} value={form.profile_photo_url} onUploaded={u=>update("profile_photo_url",u)} maxSizeKB={PROFILE_MAX}/></div>
-        <div className="grid gap-4 sm:grid-cols-2"><div><Label>Full Name *</Label><Input required value={form.full_name} onChange={e=>update("full_name",e.target.value)}/></div><div><Label>Phone *</Label><Input required value={form.phone} onChange={e=>update("phone",e.target.value)}/></div></div>
-        <div><Label>Address</Label><Input value={form.address||""} onChange={e=>update("address",e.target.value)}/></div>
+        <div className="grid gap-4 sm:grid-cols-2"><div><Label>পূর্ণ নাম *</Label><Input required value={form.full_name} onChange={e=>update("full_name",e.target.value)}/></div><div><Label>মোবাইল নম্বর *</Label><Input required value={form.phone} onChange={e=>update("phone",e.target.value)}/></div></div>
+        <div><Label>ঠিকানা</Label><Input value={form.address||""} onChange={e=>update("address",e.target.value)}/></div>
         <div><Label>গুগল ম্যাপ লিংক</Label><Input value={form.google_map_link||""} onChange={e=>update("google_map_link",e.target.value)}/></div>
         <div><Label>ফেসবুক প্রোফাইল</Label><Input value={form.facebook_link||""} onChange={e=>update("facebook_link",e.target.value)}/></div>
       </CardContent></Card>
 
-      <Card><CardHeader><CardTitle className="text-base">Professional Information</CardTitle></CardHeader><CardContent className="space-y-4">
-        <div className="grid gap-4 sm:grid-cols-2"><div><Label>Degree *</Label><Input required placeholder="MBBS, BDS, FCPS" value={form.degree} onChange={e=>update("degree",e.target.value)}/></div><div><Label>Designation</Label><Input placeholder="Consultant / Professor" value={form.designation||""} onChange={e=>update("designation",e.target.value)}/></div></div>
+      <Card><CardHeader><CardTitle className="text-base">পেশাগত তথ্য</CardTitle></CardHeader><CardContent className="space-y-4">
+        <div className="grid gap-4 sm:grid-cols-2"><div><Label>ডিগ্রি *</Label><Input required placeholder="MBBS, BDS, FCPS" value={form.degree} onChange={e=>update("degree",e.target.value)}/></div><div><Label>পদবি</Label><Input placeholder="Consultant / Professor" value={form.designation||""} onChange={e=>update("designation",e.target.value)}/></div></div>
         <div className="grid gap-4 sm:grid-cols-2"><div><Label>বিশেষত্ব *</Label><Input required placeholder="হৃদরোগ / দন্ত চিকিৎসা" value={form.specialty} onChange={e=>update("specialty",e.target.value)}/></div><div><Label>বিএমডিসি রেজিস্ট্রেশন নম্বর *</Label><Input required value={form.bmdc_registration_no} onChange={e=>update("bmdc_registration_no",e.target.value)}/></div></div>
         <div><Label>বিএমডিসি ডকুমেন্ট</Label><ImageUploader bucket="seller-verification" folder={user.id} value={form.bmdc_document_url} onUploaded={u=>update("bmdc_document_url",u)} maxSizeKB={DOC_MAX}/></div>
       </CardContent></Card>
@@ -76,13 +76,13 @@ export default function SellerVerificationPage(){
       <Card><CardHeader><CardTitle className="text-base">চেম্বারের তথ্য</CardTitle><CardDescription>বর্তমান/প্রধান Chamber-এর তথ্য দিন।</CardDescription></CardHeader><CardContent className="space-y-4">
         <div><Label>চেম্বারের নাম</Label><Input value={form.chamber_name||""} onChange={e=>update("chamber_name",e.target.value)}/></div>
         <div><Label>চেম্বারের ঠিকানা</Label><Input value={form.chamber_address||""} onChange={e=>update("chamber_address",e.target.value)}/></div>
-        <div className="grid gap-4 sm:grid-cols-2"><div><Label>Visiting Days</Label><Input value={form.visiting_days||""} onChange={e=>update("visiting_days",e.target.value)}/></div><div><Label>Visiting Time</Label><Input value={form.visiting_time||""} onChange={e=>update("visiting_time",e.target.value)}/></div></div>
-        <div><Label>Consultation Fee (৳)</Label><Input type="number" min="0" value={form.consultation_fee||""} onChange={e=>update("consultation_fee",e.target.value)}/></div>
+        <div className="grid gap-4 sm:grid-cols-2"><div><Label>রোগী দেখার দিন</Label><Input value={form.visiting_days||""} onChange={e=>update("visiting_days",e.target.value)}/></div><div><Label>রোগী দেখার সময়</Label><Input value={form.visiting_time||""} onChange={e=>update("visiting_time",e.target.value)}/></div></div>
+        <div><Label>পরামর্শ ফি (৳)</Label><Input type="number" min="0" value={form.consultation_fee||""} onChange={e=>update("consultation_fee",e.target.value)}/></div>
       </CardContent></Card>
 
-      <Card><CardHeader><CardTitle className="text-base">NID Verification</CardTitle><CardDescription>এনআইডি তথ্য শুধু verification-এর জন্য ব্যবহৃত হবে।</CardDescription></CardHeader><CardContent className="space-y-4">
-        <div><Label>NID Number *</Label><Input required value={form.nid_number} onChange={e=>update("nid_number",e.target.value)}/></div>
-        <div className="flex flex-wrap gap-6"><div><Label>NID Front *</Label><ImageUploader bucket="seller-verification" folder={user.id} value={form.nid_front_url} onUploaded={u=>update("nid_front_url",u)} maxSizeKB={DOC_MAX} aspect="wide"/></div><div><Label>NID Back *</Label><ImageUploader bucket="seller-verification" folder={user.id} value={form.nid_back_url} onUploaded={u=>update("nid_back_url",u)} maxSizeKB={DOC_MAX} aspect="wide"/></div></div>
+      <Card><CardHeader><CardTitle className="text-base">এনআইডি যাচাই</CardTitle><CardDescription>এনআইডি তথ্য শুধু verification-এর জন্য ব্যবহৃত হবে।</CardDescription></CardHeader><CardContent className="space-y-4">
+        <div><Label>এনআইডি নম্বর *</Label><Input required value={form.nid_number} onChange={e=>update("nid_number",e.target.value)}/></div>
+        <div className="flex flex-wrap gap-6"><div><Label>এনআইডি সামনে *</Label><ImageUploader bucket="seller-verification" folder={user.id} value={form.nid_front_url} onUploaded={u=>update("nid_front_url",u)} maxSizeKB={DOC_MAX} aspect="wide"/></div><div><Label>এনআইডি পেছনে *</Label><ImageUploader bucket="seller-verification" folder={user.id} value={form.nid_back_url} onUploaded={u=>update("nid_back_url",u)} maxSizeKB={DOC_MAX} aspect="wide"/></div></div>
       </CardContent></Card>
 
       {error&&<p className="text-sm text-destructive">{error}</p>}

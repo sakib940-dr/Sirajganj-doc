@@ -142,7 +142,7 @@ export default function Header() {
                   <DropdownMenuItem asChild>
                     <Link to={ROUTES.DASHBOARD}>
                       <LayoutDashboard className="h-4 w-4 text-muted-foreground" />
-                      {role === ROLES.DOCTOR ? "ডাক্তার ড্যাশবোর্ড" : "ড্যাশবোর্ড"}
+                      {role === ROLES.DOCTOR ? "ডাক্তার ড্যাশবোর্ড" : role === ROLES.HOSPITAL ? "চেম্বার/হাসপাতাল ড্যাশবোর্ড" : "ড্যাশবোর্ড"}
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>

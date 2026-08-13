@@ -3,9 +3,9 @@ import { supabase } from "@/lib/supabaseClient";
 
 const DEFAULTS = {
   // General
-  site_name: "বাজার",
+  site_name: "সিরাজগঞ্জ ডাক্তার",
   site_motto: "",
-  site_logo_url: "",
+  site_logo_url: "/doctor-logo.svg",
   site_favicon_url: "",
   // Hero section
   hero_title: "",

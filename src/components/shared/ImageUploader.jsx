@@ -5,7 +5,7 @@ import { compressImageToRange } from "@/lib/imageCompression";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
-const DEFAULT_MAX_SIZE_KB = 100;
+const DEFAULT_MAX_SIZE_KB = 1024;
 
 /**
  * @param {string} bucket - Supabase storage bucket name
@@ -25,7 +25,7 @@ export default function ImageUploader({
   onUploaded,
   aspect = "square",
   maxSizeKB = DEFAULT_MAX_SIZE_KB,
-  autoCompress = false,
+  autoCompress = true,
   compressTargetMinKB = 100,
   compressTargetMaxKB = 200,
 }) {
@@ -42,6 +42,13 @@ export default function ImageUploader({
 
     if (!file.type.startsWith("image/")) {
       setError("শুধুমাত্র ছবি ফাইল আপলোড করা যাবে।");
+      return;
+    }
+
+    // মূল ফাইল ১ MB-এর বেশি হলে আগে থেকেই reject — বড় ফাইলকে compress করে সীমা bypass করা যাবে না।
+    if (file.size > maxSizeBytes) {
+      setError("ছবির মূল ফাইল সর্বোচ্চ ১ MB হতে হবে। ছোট ছবি নির্বাচন করুন।");
+      e.target.value = "";
       return;
     }
 

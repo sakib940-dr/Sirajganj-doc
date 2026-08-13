@@ -22,7 +22,7 @@ const EMPTY = {
 };
 
 export default function ShopSettingsPage() {
-  const { user } = useAuth();
+  const { user, role } = useAuth();
   const [shop, setShop] = useState(EMPTY);
   const [shopId, setShopId] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -54,7 +54,7 @@ export default function ShopSettingsPage() {
     e.preventDefault();
     setError(""); setSaved(false);
     if (!shop.shop_name.trim() || !shop.slug.trim()) {
-      setError("চেম্বারের নাম ও লিংক অবশ্যই দিতে হবে।"); return;
+      setError("চেম্বার/হাসপাতালের নাম ও লিংক অবশ্যই দিতে হবে।"); return;
     }
     setSaving(true);
     try {
@@ -81,7 +81,7 @@ export default function ShopSettingsPage() {
     } finally { setSaving(false); }
   };
 
-  if (loading) return <LoadingSpinner label="চেম্বার তথ্য লোড হচ্ছে..." />;
+  if (loading) return <LoadingSpinner label="চেম্বার/হাসপাতালের তথ্য লোড হচ্ছে..." />;
 
   return (
     <div className="max-w-2xl space-y-6">
@@ -109,14 +109,14 @@ export default function ShopSettingsPage() {
             <div><Label className="mb-2 block">চেম্বারের লোগো</Label>
               <ImageUploader bucket="shop-logos" folder={user.id} value={shop.logo_url} onUploaded={url => update("logo_url", url)} />
             </div>
-            <div className="min-w-[220px] flex-1"><Label className="mb-2 block">Banner</Label>
+            <div className="min-w-[220px] flex-1"><Label className="mb-2 block">ব্যানার</Label>
               <ImageUploader bucket="shop-banners" folder={user.id} value={shop.banner_url} onUploaded={url => update("banner_url", url)} aspect="wide" />
             </div>
           </CardContent>
         </Card>
 
         <Card>
-          <CardHeader><CardTitle className="text-base">চেম্বারের তথ্য</CardTitle></CardHeader>
+          <CardHeader><CardTitle className="text-base">{role === "hospital" ? "চেম্বার / হাসপাতালের তথ্য" : "চেম্বারের তথ্য"}</CardTitle></CardHeader>
           <CardContent className="space-y-4">
             <div className="grid gap-4 sm:grid-cols-2">
               <div><Label>চেম্বারের নাম *</Label><Input required value={shop.shop_name} onChange={e => handleName(e.target.value)} /></div>

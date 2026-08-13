@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 420">
+<defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#0f766e"/><stop offset="1" stop-color="#0f172a"/></linearGradient></defs>
+<rect width="1200" height="420" fill="url(#g)"/>
+<circle cx="1020" cy="70" r="220" fill="#ffffff" opacity=".08"/>
+<circle cx="1110" cy="330" r="160" fill="#ffffff" opacity=".06"/>
+<text x="80" y="170" font-family="sans-serif" font-size="58" font-weight="700" fill="white">সিরাজগঞ্জ হার্ট কেয়ার</text>
+<text x="80" y="225" font-family="sans-serif" font-size="28" fill="#e2e8f0">সিরাজগঞ্জ • বিশ্বস্ত চিকিৎসা সেবা</text>
+<rect x="80" y="265" width="250" height="58" rx="29" fill="#ffffff" opacity=".15"/>
+<text x="205" y="303" text-anchor="middle" font-family="sans-serif" font-size="24" font-weight="600" fill="white">ডাক্তার দেখুন</text>
+</svg>

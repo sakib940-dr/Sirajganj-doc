@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 900">
+<defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#eef5ff"/><stop offset="1" stop-color="#ffffff"/></linearGradient></defs>
+<rect width="800" height="900" rx="56" fill="url(#g)"/>
+<circle cx="400" cy="320" r="142" fill="#c58c68"/>
+<path d="M258 308c8-130 76-190 144-190 96 0 151 74 145 193-32-42-72-58-123-54-56 4-101 24-166 51z" fill="#1f2937"/>
+<circle cx="350" cy="326" r="12" fill="#1f2937"/><circle cx="450" cy="326" r="12" fill="#1f2937"/>
+<path d="M355 390q45 35 90 0" fill="none" stroke="#7a3d3d" stroke-width="8" stroke-linecap="round"/>
+<path d="M226 820c18-194 93-265 174-265h0c81 0 156 71 174 265" fill="#eef6ff"/>
+<path d="M326 555l74 105 74-105" fill="none" stroke="#cbd5e1" stroke-width="10"/>
+<circle cx="400" cy="650" r="45" fill="#ffffff" stroke="#0f766e" stroke-width="8"/>
+<path d="M400 615v70M365 650h70" stroke="#0f766e" stroke-width="12" stroke-linecap="round"/>
+<path d="M476 700c58 25 70 84 25 104-35 16-58-17-38-46 20-30 0-64-19-70" fill="none" stroke="#0f766e" stroke-width="8"/>
+<text x="400" y="870" text-anchor="middle" font-family="sans-serif" font-size="26" font-weight="700" fill="#115e59">ডা. ফারহানা আক্তার</text>
+</svg>

@@ -100,7 +100,7 @@ export default function AccountPage() {
               value=""
               onUploaded={handleAvatarUploaded}
               aspect="square"
-              maxSizeKB={5120}
+              maxSizeKB={1024}
               autoCompress
               compressTargetMinKB={80}
               compressTargetMaxKB={150}

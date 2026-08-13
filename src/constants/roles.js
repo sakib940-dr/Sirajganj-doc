@@ -1,6 +1,7 @@
 export const ROLES = {
   PATIENT: "patient",
   DOCTOR: "doctor",
+  HOSPITAL: "hospital",
   ADMIN: "admin",
   SUPER_ADMIN: "super_admin",
 };
@@ -11,6 +12,7 @@ export const ROLES = {
 export const ROLE_LABEL_BN = {
   [ROLES.PATIENT]: "রোগী",
   [ROLES.DOCTOR]: "ডাক্তার",
+  [ROLES.HOSPITAL]: "চেম্বার/হাসপাতাল",
   [ROLES.ADMIN]: "অ্যাডমিন",
   [ROLES.SUPER_ADMIN]: "সুপার অ্যাডমিন",
 };
@@ -26,6 +28,8 @@ export const ACCOUNT_STATUS_LABEL_BN = {
 };
 
 // role hierarchy — Admin Panel অ্যাক্সেসের জন্য ব্যবহৃত হয়
+export function isProvider(role) { return role === ROLES.DOCTOR || role === ROLES.HOSPITAL; }
+
 export function isAdminOrAbove(role) {
   return role === ROLES.ADMIN || role === ROLES.SUPER_ADMIN;
 }
