@@ -209,7 +209,7 @@ export default function ProviderProfileCenterPage() {
             <Label>হাসপাতাল/চেম্বারের ছবি (সর্বোচ্চ ৪টি)</Label>
             <p className="mb-2 text-xs text-muted-foreground">রোগীরা চেম্বার/হাসপাতালের পেজ খুললে এগুলো উপরে দেখতে পাবে। প্রতিটি ছবি সর্বোচ্চ ১ MB; আপলোডের পর স্বয়ংক্রিয়ভাবে কমপ্রেস হবে।</p>
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-              {[0,1,2,3].map(i=><ImageUploader key={i} bucket="shop-images" folder={user.id} value={shop.hospital_photo_urls?.[i] || ""} onUploaded={url=>changeShop("hospital_photo_urls", [...(shop.hospital_photo_urls||[]).filter((_,j)=>j!==i).slice(0,i), url, ...(shop.hospital_photo_urls||[]).slice(i+1)])} aspect="landscape" maxSizeKB={1024} autoCompress compressTargetMinKB={100} compressTargetMaxKB={200}/>)}
+              {[0,1,2,3].map(i=><ImageUploader key={i} bucket="shop-gallery" folder={user.id} value={shop.hospital_photo_urls?.[i] || ""} onUploaded={url=>changeShop("hospital_photo_urls", [...(shop.hospital_photo_urls||[]).filter((_,j)=>j!==i).slice(0,i), url, ...(shop.hospital_photo_urls||[]).slice(i+1)])} aspect="landscape" maxSizeKB={1024} autoCompress compressTargetMinKB={100} compressTargetMaxKB={200}/>)}
             </div>
           </div>
           <div className="flex items-center justify-between gap-3"><SaveState saved={saved==="shop"} error={errors.shop}/><Button onClick={()=>save("shop")} disabled={saving==="shop"}>{saving==="shop"?"সংরক্ষণ হচ্ছে...":"এই অংশ সংরক্ষণ করুন"}</Button></div>
