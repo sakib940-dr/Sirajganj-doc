@@ -30,21 +30,36 @@ export default function ProtectedRoute({ children, requiredRole, allowPendingDoc
     return <Navigate to={ROUTES.LOGIN} replace />;
   }
 
-  if (requiredRole === ROLES.SUPER_ADMIN && role !== ROLES.SUPER_ADMIN) {
-    return <Navigate to={ROUTES.ADMIN} replace />;
+  // প্রতিটি role-এর জন্য আলাদা dashboard boundary:
+  // Doctor/Hospital → provider dashboard, Admin/Super Admin → admin panel,
+  // Patient → patient dashboard. কোনো role অন্য role-এর dashboard দেখবে না।
+  if (requiredRole === ROLES.SUPER_ADMIN) {
+    if (role === ROLES.SUPER_ADMIN) return children;
+    if (role === ROLES.ADMIN) return <Navigate to={ROUTES.ADMIN} replace />;
+    if (role === ROLES.DOCTOR || role === ROLES.HOSPITAL) return <Navigate to={ROUTES.DASHBOARD} replace />;
+    return <Navigate to={ROUTES.PATIENT_DASHBOARD} replace />;
   }
 
-  if (requiredRole === ROLES.ADMIN && !isAdminOrAbove(role)) {
-    return <Navigate to={ROUTES.HOME} replace />;
+  if (requiredRole === ROLES.ADMIN) {
+    if (role === ROLES.ADMIN || role === ROLES.SUPER_ADMIN) return children;
+    if (role === ROLES.DOCTOR || role === ROLES.HOSPITAL) return <Navigate to={ROUTES.DASHBOARD} replace />;
+    return <Navigate to={ROUTES.PATIENT_DASHBOARD} replace />;
   }
 
   if (requiredRole === ROLES.DOCTOR) {
-    const isDoctorOrHospitalOrAdmin = role === ROLES.DOCTOR || role === ROLES.HOSPITAL || isAdminOrAbove(role);
-    if (!isDoctorOrHospitalOrAdmin) {
-      return <Navigate to={ROUTES.HOME} replace />;
+    if (role !== ROLES.DOCTOR && role !== ROLES.HOSPITAL) {
+      if (role === ROLES.ADMIN || role === ROLES.SUPER_ADMIN) return <Navigate to={ROUTES.ADMIN} replace />;
+      return <Navigate to={ROUTES.PATIENT_DASHBOARD} replace />;
     }
-    if ((role === ROLES.DOCTOR || role === ROLES.HOSPITAL) && doctorStatus !== "approved" && !(allowPendingDoctor || allowPendingSeller)) {
+    if (doctorStatus !== "approved" && !(allowPendingDoctor || allowPendingSeller)) {
       return <Navigate to={ROUTES.DASHBOARD} replace />;
+    }
+  }
+
+  if (requiredRole === ROLES.PATIENT) {
+    if (role !== ROLES.PATIENT) {
+      if (role === ROLES.ADMIN || role === ROLES.SUPER_ADMIN) return <Navigate to={ROUTES.ADMIN} replace />;
+      if (role === ROLES.DOCTOR || role === ROLES.HOSPITAL) return <Navigate to={ROUTES.DASHBOARD} replace />;
     }
   }
 

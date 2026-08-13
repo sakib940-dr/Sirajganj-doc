@@ -3,6 +3,7 @@ import { Outlet, Link, NavLink } from "react-router-dom";
 import {
   LayoutDashboard,
   Store,
+  Globe2,
   Images,
   ShieldCheck,
   TrendingUp,
@@ -22,6 +23,7 @@ const navItems = [
   { to: ROUTES.DASHBOARD_APPOINTMENTS, label: "অ্যাপয়েন্টমেন্ট", icon: CalendarDays },
   { to: ROUTES.DASHBOARD_ANALYTICS, label: "অ্যানালিটিক্স", icon: TrendingUp },
   { to: ROUTES.DASHBOARD_SHOP, label: "চেম্বারের তথ্য", icon: Store },
+  { to: ROUTES.DASHBOARD_WEBSITE, label: "ওয়েবসাইট বিল্ডার", icon: Globe2 },
   { to: ROUTES.DASHBOARD_GALLERY, label: "গ্যালারি", icon: Images },
   { to: ROUTES.DASHBOARD_VERIFICATION, label: "ভেরিফিকেশন", icon: ShieldCheck },
 ];

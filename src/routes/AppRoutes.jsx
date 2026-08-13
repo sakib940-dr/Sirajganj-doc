@@ -14,6 +14,7 @@ import ShopPage from "@/pages/public/ShopPage.jsx";
 import ShopsListPage from "@/pages/public/ShopsListPage.jsx";
 import ProductPage from "@/pages/public/ProductPage.jsx";
 import SearchResultPage from "@/pages/public/SearchResultPage.jsx";
+import DoctorsListPage from "@/pages/public/DoctorsListPage.jsx";
 import LoginPage from "@/pages/public/LoginPage.jsx";
 import RegisterPage from "@/pages/public/RegisterPage.jsx";
 import ForgotPasswordPage from "@/pages/public/ForgotPasswordPage.jsx";
@@ -27,11 +28,13 @@ import FaqPage from "@/pages/public/FaqPage.jsx";
 import HelpPage from "@/pages/public/HelpPage.jsx";
 import FeedbackPage from "@/pages/public/FeedbackPage.jsx";
 import PatientAppointmentsPage from "@/pages/public/AppointmentsPage.jsx";
+import PatientDashboardPage from "@/pages/public/PatientDashboardPage.jsx";
 import NotFoundPage from "@/pages/public/NotFoundPage.jsx";
 
 // Seller
 import DashboardHome from "@/pages/seller/DashboardHome.jsx";
 import ShopSettingsPage from "@/pages/seller/ShopSettingsPage.jsx";
+import WebsiteBuilderPage from "@/pages/seller/WebsiteBuilderPage.jsx";
 import ProductListPage from "@/pages/seller/ProductListPage.jsx";
 import ProductEditPage from "@/pages/seller/ProductEditPage.jsx";
 import GalleryPage from "@/pages/seller/GalleryPage.jsx";
@@ -62,6 +65,7 @@ export default function AppRoutes() {
         <Route path={ROUTES.SHOP} element={<ShopPage />} />
         <Route path={ROUTES.PRODUCT} element={<ProductPage />} />
         <Route path={ROUTES.SEARCH} element={<SearchResultPage />} />
+        <Route path={ROUTES.DOCTORS} element={<DoctorsListPage />} />
         <Route path={ROUTES.LOGIN} element={<LoginPage />} />
         <Route path={ROUTES.REGISTER} element={<RegisterPage />} />
         <Route path={ROUTES.FORGOT_PASSWORD} element={<ForgotPasswordPage />} />
@@ -89,8 +93,29 @@ export default function AppRoutes() {
             </ProtectedRoute>
           }
         />
+        <Route
+          path={ROUTES.APPOINTMENTS}
+          element={
+            <ProtectedRoute requiredRole={ROLES.PATIENT}>
+              <PatientAppointmentsPage />
+            </ProtectedRoute>
+          }
+        />
       </Route>
 
+      {/* Patient Dashboard — শুধুমাত্র patient role */}
+      <Route
+        path={ROUTES.PATIENT_DASHBOARD}
+        element={
+          <ProtectedRoute requiredRole={ROLES.PATIENT}>
+            <MainLayout />
+          </ProtectedRoute>
+        }
+      >
+        <Route index element={<PatientDashboardPage />} />
+      </Route>
+
+      {/* Provider Dashboard — শুধুমাত্র Doctor/Chamber-Hospital; Admin/Patient এখানে ঢুকলে নিজের dashboard-এ redirect হবে */}
       {/* Seller (protected, role: seller — pending seller-রাও ঢুকতে পারবে যাতে Pending নোটিশ দেখতে পায়) */}
       <Route
         element={
@@ -101,6 +126,7 @@ export default function AppRoutes() {
       >
         <Route path={ROUTES.DASHBOARD} element={<DashboardHome />} />
         <Route path={ROUTES.DASHBOARD_SHOP} element={<ShopSettingsPage />} />
+        <Route path={ROUTES.DASHBOARD_WEBSITE} element={<WebsiteBuilderPage />} />
         <Route path={ROUTES.DASHBOARD_PRODUCTS} element={<ProductListPage />} />
         <Route path={ROUTES.DASHBOARD_PRODUCT_NEW} element={<ProductEditPage />} />
         <Route path={ROUTES.DASHBOARD_PRODUCT_EDIT} element={<ProductEditPage />} />

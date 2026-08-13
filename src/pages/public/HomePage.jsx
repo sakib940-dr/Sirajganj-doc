@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { Search, Tag, Store, Package, Flame, Sparkles } from "lucide-react";
+import { Search, Tag, Store, Package, Flame, Sparkles, MapPin } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import CategoryChipsRow from "@/components/shared/CategoryChipsRow.jsx";
@@ -11,7 +11,9 @@ import ProductRow from "@/components/shared/ProductRow.jsx";
 import EmptyState from "@/components/shared/EmptyState.jsx";
 import { useCategories } from "@/hooks/useCategories";
 import { useShops } from "@/hooks/useShops";
-import { useLatestProducts, usePopularProducts } from "@/hooks/useProducts";
+import { useLatestProducts, usePopularProducts, useProductsByLocation } from "@/hooks/useProducts";
+import { useVisitorLocation } from "@/hooks/useVisitorLocation";
+import LocationDoctorSection from "@/components/public/LocationDoctorSection.jsx";
 import { useBanners } from "@/hooks/useBanners";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
 import { ROUTES } from "@/constants/routes";
@@ -36,6 +38,31 @@ export default function HomePage() {
   const { products: popularProducts, loading: popularLoading } = usePopularProducts({ limit: 10 });
   const { banners } = useBanners();
   const { settings } = useSiteSettings();
+  const { location: visitorLocation, requestLocation, selectArea, upazilas } = useVisitorLocation();
+
+  useEffect(() => {
+    const asked = window.localStorage.getItem("doctor_v1_location_prompted");
+    if (!asked) {
+      const timer = window.setTimeout(() => {
+        window.localStorage.setItem("doctor_v1_location_prompted", "1");
+        requestLocation();
+      }, 900);
+      return () => window.clearTimeout(timer);
+    }
+  }, [requestLocation]);
+  const { products: localDoctors, loading: localDoctorsLoading } = useProductsByLocation({
+    district: visitorLocation.district,
+    upazila: visitorLocation.upazila,
+    limit: 50,
+  });
+  const { products: districtDoctors, loading: districtDoctorsLoading } = useProductsByLocation({
+    district: visitorLocation.district,
+    limit: 50,
+  });
+
+  const lowerDistrictDoctors = visitorLocation.upazila
+    ? (districtDoctors || []).filter((doctor) => !new Set((localDoctors || []).map((d) => d.id)).has(doctor.id))
+    : districtDoctors;
 
 
   useEffect(() => { document.title = "সিরাজগঞ্জ ডাক্তার — ডাক্তার খুঁজুন"; }, []);
@@ -83,7 +110,7 @@ export default function HomePage() {
               <Input
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                placeholder="যেমন: হৃদরোগের ডাক্তার, চোখের ডাক্তার, সিরাজগঞ্জ..."
+                placeholder="যেমন: হৃদরোগের ডাক্তার, শিশু বিশেষজ্ঞ, দন্ত চিকিৎসক, সিরাজগঞ্জ সদর..."
                 className="h-10 rounded-lg pl-10 text-sm text-foreground md:h-12 md:text-base"
               />
             </div>
@@ -100,11 +127,16 @@ export default function HomePage() {
 
       {/* Categories — কম্প্যাক্ট horizontal-scroll circle রো (২-সারি) */}
       <section className="container py-8 md:py-10">
-        <div className="mb-4">
-          <h2 className="text-lg font-bold md:text-xl" style={{ fontFamily: "'Tiro Bangla', serif" }}>
-            ক্যাটাগরি অনুযায়ী দেখুন
-          </h2>
-          <p className="text-xs text-muted-foreground md:text-sm">যা খুঁজছেন তা সহজে বেছে নিন</p>
+        <div className="mb-4 flex items-center justify-between gap-3">
+          <div>
+            <h2 className="text-lg font-bold md:text-xl" style={{ fontFamily: "'Tiro Bangla', serif" }}>
+              ক্যাটাগরি অনুযায়ী দেখুন
+            </h2>
+            <p className="text-xs text-muted-foreground md:text-sm">যা খুঁজছেন তা সহজে বেছে নিন</p>
+          </div>
+          {categories.length > 0 && (
+            <a href={ROUTES.CATEGORIES} className="shrink-0 text-xs font-medium text-primary md:text-sm">সব দেখুন →</a>
+          )}
         </div>
 
         {catLoading ? (
@@ -124,6 +156,33 @@ export default function HomePage() {
         )}
       </section>
 
+      {/* Visitor location — ক্যাটাগরির পরেই এলাকার ডাক্তার */}
+      <LocationDoctorSection
+        location={visitorLocation}
+        requestLocation={requestLocation}
+        selectArea={selectArea}
+        upazilas={upazilas}
+        products={localDoctors}
+        loading={localDoctorsLoading}
+        viewAllTo={`${ROUTES.DOCTORS}?district=${encodeURIComponent(visitorLocation.district || "সিরাজগঞ্জ")}${visitorLocation.upazila ? `&upazila=${encodeURIComponent(visitorLocation.upazila)}` : ""}`}
+      />
+
+      {/* নির্বাচিত উপজেলা থাকলে তার নিচে পুরো জেলার ডাক্তার */}
+      {visitorLocation.upazila && (
+        <ProductRow
+          title={`${visitorLocation.district} জেলার সকল ডাক্তার`}
+          subtitle="সিরাজগঞ্জ জেলার অন্য উপজেলা থেকেও ডাক্তার দেখুন"
+          icon={MapPin}
+          accentClassName="bg-secondary text-primary"
+          products={lowerDistrictDoctors}
+          loading={districtDoctorsLoading}
+          emptyIcon={MapPin}
+          emptyTitle="এই জেলায় এখনো অন্য কোনো ডাক্তার প্রোফাইল নেই"
+          emptyDescription="নতুন ডাক্তার যোগ হলে এখানে দেখা যাবে।"
+          viewAllTo={`${ROUTES.DOCTORS}?district=${encodeURIComponent(visitorLocation.district)}&section=latest`}
+        />
+      )}
+
       {/* জনপ্রিয় ডাক্তার প্রোফাইল — sold_count/view_count অনুযায়ী */}
       <ProductRow
         title="জনপ্রিয় ডাক্তার প্রোফাইল"
@@ -135,6 +194,7 @@ export default function HomePage() {
         emptyIcon={Package}
         emptyTitle="এখনো কোনো জনপ্রিয় ডাক্তার প্রোফাইল নেই"
         emptyDescription="ডাক্তার প্রোফাইলের ভিউ বাড়লে এখানে দেখানো হবে।"
+        viewAllTo={`${ROUTES.DOCTORS}?section=popular`}
       />
 
       {/* Featured Shops — কম্প্যাক্ট horizontal-scroll রো, প্রোডাক্ট রো-গুলোর সাথে সামঞ্জস্যপূর্ণ */}
@@ -150,6 +210,8 @@ export default function HomePage() {
         emptyIcon={Store}
         emptyTitle="এখনো কোনো চেম্বার অনুমোদিত হয়নি"
         emptyDescription="ডাক্তাররা অনুমোদন পেলে তাদের চেম্বার এখানে প্রদর্শিত হবে।"
+        visitorLatitude={visitorLocation.latitude}
+        visitorLongitude={visitorLocation.longitude}
       />
 
       {/* সাম্প্রতিক ডাক্তার প্রোফাইল */}
@@ -160,7 +222,7 @@ export default function HomePage() {
         accentClassName="bg-primary/10 text-primary"
         products={latestProducts}
         loading={latestLoading}
-        viewAllTo={ROUTES.SEARCH}
+        viewAllTo={`${ROUTES.DOCTORS}?section=latest`}
         emptyIcon={Package}
         emptyTitle="এখনো কোনো ডাক্তার প্রোফাইল যোগ করা হয়নি"
         emptyDescription="ডাক্তাররা ডাক্তার প্রোফাইল যোগ করলে তা এখানে দেখানো হবে।"

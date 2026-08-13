@@ -22,6 +22,8 @@ export default function ShopRow({
   emptyTitle,
   emptyDescription,
   accentClassName,
+  visitorLatitude,
+  visitorLongitude,
 }) {
   return (
     <section id={id} className="bg-secondary/40 py-8 md:py-10">
@@ -70,6 +72,8 @@ export default function ShopRow({
               <ShopCard
                 key={shop.id}
                 shop={shop}
+                visitorLatitude={visitorLatitude}
+                visitorLongitude={visitorLongitude}
                 className="w-56 shrink-0 snap-start sm:w-64"
               />
             ))}

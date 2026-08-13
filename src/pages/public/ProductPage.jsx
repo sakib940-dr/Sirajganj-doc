@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
-import { UserRound, Heart, ChevronLeft, ChevronRight, MapPin, Phone, MessageCircle, CalendarDays, Share2, Check } from "lucide-react";
+import { UserRound, Heart, ChevronLeft, ChevronRight, MapPin, Phone, MessageCircle, CalendarDays, Share2, Check, Navigation } from "lucide-react";
 import { useProductBySlug, useRelatedProducts } from "@/hooks/useProducts";
 import { formatPriceBn } from "@/lib/utils";
 import { shopPath } from "@/constants/routes";
@@ -73,9 +73,16 @@ export default function ProductPage() {
 
         {product.description&&<div className="mt-6"><h2 className="mb-2 font-semibold">ডাক্তারের সম্পর্কে</h2><p className="whitespace-pre-line text-sm leading-relaxed text-foreground/90">{product.description}</p></div>}
 
-        {chamber&&<Link to={shopPath(chamber.slug)} className="mt-6 block rounded-2xl border bg-card p-4 hover:border-primary/40">
-          <div className="flex items-start gap-3"><MapPin className="mt-0.5 h-5 w-5 text-primary"/><div><p className="font-semibold">{chamber.chamber_name||chamber.shop_name}</p><p className="mt-1 text-sm text-muted-foreground">{chamber.address}</p>{chamber.visiting_days&&<p className="mt-1 text-xs text-muted-foreground">{chamber.visiting_days}{chamber.visiting_time?` • ${chamber.visiting_time}`:""}</p>}</div></div>
-        </Link>}
+        {chamber&&<div className="mt-6 rounded-2xl border bg-card p-4">
+          <Link to={shopPath(chamber.slug)} className="block hover:text-primary">
+            <div className="flex items-start gap-3"><MapPin className="mt-0.5 h-5 w-5 text-primary"/><div><p className="font-semibold">{chamber.chamber_name||chamber.shop_name}</p><p className="mt-1 text-sm text-muted-foreground">{chamber.address}</p>{chamber.visiting_days&&<p className="mt-1 text-xs text-muted-foreground">{chamber.visiting_days}{chamber.visiting_time?` • ${chamber.visiting_time}`:""}</p>}</div></div>
+          </Link>
+          {(chamber.google_map_link || chamber.address) && <a
+            href={chamber.google_map_link || `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(chamber.address || "")}`}
+            target="_blank" rel="noreferrer"
+            className="mt-3 inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground"
+          ><Navigation className="h-4 w-4"/> দিকনির্দেশনা</a>}
+        </div>}
       </div>
     </div>
 

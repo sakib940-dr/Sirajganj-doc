@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
-import { Store, MapPin, MessageCircle } from "lucide-react";
+import { Store, MapPin, MessageCircle, Navigation } from "lucide-react";
+import { calculateDistanceKm, formatDistanceKm } from "@/lib/geo";
 import { shopPath } from "@/constants/routes";
 import { cn } from "@/lib/utils";
 
@@ -9,7 +10,9 @@ import { cn } from "@/lib/utils";
  * চেম্বার চেনার প্রধান ভিজ্যুয়াল অ্যাঙ্কর হয়ে থাকে। গ্রিড ও horizontal-scroll
  * রো (ShopRow) — দুই জায়গাতেই `className`-এ width দিয়ে ব্যবহারযোগ্য।
  */
-export default function ShopCard({ shop, className }) {
+export default function ShopCard({ shop, className, visitorLatitude, visitorLongitude }) {
+  const distanceKm = calculateDistanceKm(visitorLatitude, visitorLongitude, shop.latitude, shop.longitude);
+  const distanceLabel = formatDistanceKm(distanceKm);
   return (
     <Link
       to={shopPath(shop.slug)}
@@ -48,6 +51,12 @@ export default function ShopCard({ shop, className }) {
               সরাসরি যোগাযোগ করা যাবে
             </p>
           ) : null}
+          {distanceLabel && (
+            <p className="mt-1 inline-flex items-center gap-1 text-[11px] font-semibold text-primary">
+              <Navigation className="h-3 w-3" />
+              {distanceLabel}
+            </p>
+          )}
         </div>
       </div>
     </Link>

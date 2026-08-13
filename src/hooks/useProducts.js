@@ -3,7 +3,7 @@ import { supabase } from "@/lib/supabaseClient";
 import { getSearchSynonyms, expandSearchTerms } from "@/lib/searchSynonyms";
 
 const PRODUCT_SELECT =
-  "*, shops:shop_id ( shop_name, chamber_name, slug, whatsapp_number, phone, address, google_map_link, facebook_link, messenger_link, visiting_days, visiting_time, consultation_fee ), categories:category_id ( name, slug )";
+  "*, shops:shop_id ( shop_name, chamber_name, slug, whatsapp_number, phone, address, district, upazila, google_map_link, facebook_link, messenger_link, visiting_days, visiting_time, consultation_fee, latitude, longitude ), categories:category_id ( name, slug )";
 
 export function useLatestProducts({ limit = 8 } = {}) {
   const [products, setProducts] = useState([]);
@@ -323,6 +323,69 @@ export function useRelatedProducts(categoryId, excludeProductId, { limit = 8 } =
       active = false;
     };
   }, [categoryId, excludeProductId, limit]);
+
+  return { products, loading };
+}
+
+
+/**
+ * নির্দিষ্ট জেলা/উপজেলার ডাক্তার প্রোফাইল।
+ * Doctor-এর location তার Chamber/Hospital-এর location থেকে নেওয়া হয়।
+ */
+export function useProductsByLocation({ district, upazila, limit = 50 } = {}) {
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (!district) {
+      setProducts([]);
+      return;
+    }
+
+    let active = true;
+
+    async function load() {
+      setLoading(true);
+
+      let shopsQuery = supabase
+        .from("shops")
+        .select("id")
+        .eq("is_active", true)
+        .eq("district", district);
+
+      if (upazila) shopsQuery = shopsQuery.eq("upazila", upazila);
+
+      const { data: shops, error: shopsError } = await shopsQuery;
+      if (!active) return;
+
+      if (shopsError || !shops?.length) {
+        setProducts([]);
+        setLoading(false);
+        return;
+      }
+
+      const shopIds = shops.map((shop) => shop.id);
+
+      const { data, error } = await supabase
+        .from("products")
+        .select(PRODUCT_SELECT)
+        .eq("is_active", true)
+        .in("shop_id", shopIds)
+        .order("view_count", { ascending: false })
+        .limit(limit);
+
+      if (!active) return;
+
+      setProducts(error ? [] : data ?? []);
+      setLoading(false);
+    }
+
+    load();
+
+    return () => {
+      active = false;
+    };
+  }, [district, upazila, limit]);
 
   return { products, loading };
 }

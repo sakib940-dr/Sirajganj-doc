@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import { Store } from "lucide-react";
+import { Stethoscope } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -30,30 +30,32 @@ export default function LoginPage() {
       return;
     }
 
-    // যদি কোনো Protected route থেকে redirect হয়ে এখানে আসা হয়ে থাকে, সেই
-    // পুরনো আচরণটাই বজায় রাখা হচ্ছে (আগে যেখানে যেতে চেয়েছিল সেখানেই ফেরত পাঠানো)।
-    const redirectFrom = location.state?.from?.pathname;
-    if (redirectFrom) {
-      navigate(redirectFrom, { replace: true });
-      return;
-    }
-
-    // অন্যথায় role অনুযায়ী সঠিক ড্যাশবোর্ডে পাঠানো হচ্ছে — visitor/সাধারণ ইউজার
-    // আগের মতোই Home page-এ যাবে।
-    let destination = ROUTES.HOME;
+    // Login সফল হলে সবসময় role অনুযায়ী নিজের dashboard-এ যাবে।
+    // কোনো পুরোনো/visitor URL যেন অন্য role-এর dashboard দেখাতে না পারে।
     const userId = data?.user?.id;
+    let destination = ROUTES.PATIENT_DASHBOARD;
+
     if (userId) {
-      const { data: profile } = await supabase
+      const { data: profile, error: profileError } = await supabase
         .from("profiles")
         .select("role")
         .eq("id", userId)
         .single();
-      if (profile?.role === ROLES.DOCTOR) {
+
+      if (profileError) {
+        setError("প্রোফাইল তথ্য লোড করা যায়নি। আবার চেষ্টা করুন।");
+        return;
+      }
+
+      if (profile?.role === ROLES.DOCTOR || profile?.role === ROLES.HOSPITAL) {
         destination = ROUTES.DASHBOARD;
       } else if (profile?.role === ROLES.ADMIN || profile?.role === ROLES.SUPER_ADMIN) {
         destination = ROUTES.ADMIN;
+      } else {
+        destination = ROUTES.PATIENT_DASHBOARD;
       }
     }
+
     navigate(destination, { replace: true });
   };
 
@@ -62,7 +64,7 @@ export default function LoginPage() {
       <Card className="w-full max-w-sm">
         <CardHeader className="items-center text-center">
           <span className="mb-2 flex h-11 w-11 items-center justify-center rounded-xl bg-primary text-primary-foreground">
-            <Store className="h-5 w-5" />
+            <Stethoscope className="h-5 w-5" />
           </span>
           <CardTitle style={{ fontFamily: "'Tiro Bangla', serif" }}>লগইন করুন</CardTitle>
           <CardDescription>আপনার অ্যাকাউন্টে প্রবেশ করুন</CardDescription>

@@ -223,3 +223,8 @@ supabase functions deploy admin-reset-password
 `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY` — এই তিনটি Secret Supabase Edge Function-এ Deploy করার সময় স্বয়ংক্রিয়ভাবেই available থাকে, আলাদা করে সেট করতে হয় না।
 
 > **নোট:** এই সিস্টেমেও কোথাও plain-text পাসওয়ার্ড ডাটাবেসে সংরক্ষিত হয় না — শুধু Admin নতুন পাসওয়ার্ড *সেট* করতে পারেন এবং একবার দেখতে পারেন, যা সেলারের কাছে পৌঁছে দেওয়ার জন্যই যথেষ্ট।
+
+
+## Step 11 — Location & Distance
+Run `supabase/step11_distance_location.sql` once after Step 10.
+Exact GPS coordinates are saved to Supabase only for logged-in users who grant location permission. Guests keep them in the browser session/local state. Chamber/Hospital coordinates are saved on the chamber record. Distance is calculated client-side with the Haversine formula and shown on chamber cards only when both exact locations are available.

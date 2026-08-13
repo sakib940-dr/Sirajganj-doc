@@ -4,6 +4,7 @@ export const ROUTES = {
   SHOP: "/shop/:shopSlug",
   PRODUCT: "/product/:productSlug",
   SEARCH: "/search",
+  DOCTORS: "/doctors",
   LOGIN: "/login",
   REGISTER: "/register",
   FORGOT_PASSWORD: "/forgot-password",
@@ -20,7 +21,9 @@ export const ROUTES = {
   FEEDBACK: "/feedback",
 
   DASHBOARD: "/dashboard",
+  PATIENT_DASHBOARD: "/patient/dashboard",
   DASHBOARD_SHOP: "/dashboard/shop",
+  DASHBOARD_WEBSITE: "/dashboard/website-builder",
   DASHBOARD_PRODUCTS: "/dashboard/products",
   DASHBOARD_PRODUCT_NEW: "/dashboard/products/new",
   DASHBOARD_PRODUCT_EDIT: "/dashboard/products/:id/edit",

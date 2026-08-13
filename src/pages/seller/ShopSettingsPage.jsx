@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { ExternalLink, Save, Check } from "lucide-react";
+import { ExternalLink, Save, Check, Navigation } from "lucide-react";
 import { supabase } from "@/lib/supabaseClient";
 import { useAuth } from "@/hooks/useAuth";
 import { slugify } from "@/lib/utils";
@@ -17,7 +17,8 @@ import ProductEditPage from "@/pages/seller/ProductEditPage.jsx";
 const EMPTY = {
   shop_name: "", slug: "", logo_url: "", banner_url: "", about: "",
   phone: "", whatsapp_number: "", address: "", google_map_link: "",
-  facebook_link: "", messenger_link: "", chamber_name: "", chamber_type: "",
+  facebook_link: "", messenger_link: "", chamber_name: "", chamber_type: "", district: "সিরাজগঞ্জ", upazila: "",
+  latitude: "", longitude: "",
   visiting_days: "", visiting_time: "", consultation_fee: "", assistant_phone: ""
 };
 
@@ -50,6 +51,23 @@ export default function ShopSettingsPage() {
     if (!slugEdited) update("slug", slugify(value));
   };
 
+  const useCurrentLocation = () => {
+    if (!navigator.geolocation) {
+      setError("এই ডিভাইসে অবস্থান সুবিধা পাওয়া যাচ্ছে না।");
+      return;
+    }
+    setError("");
+    navigator.geolocation.getCurrentPosition(
+      ({ coords }) => {
+        update("latitude", coords.latitude.toFixed(7));
+        update("longitude", coords.longitude.toFixed(7));
+        setSaved(false);
+      },
+      () => setError("অবস্থান পাওয়া যায়নি। ব্রাউজারে Location Permission দিন।"),
+      { enableHighAccuracy: true, timeout: 12000, maximumAge: 60000 }
+    );
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError(""); setSaved(false);
@@ -63,6 +81,8 @@ export default function ShopSettingsPage() {
         owner_id: user.id,
         slug: slugify(shop.slug),
         chamber_name: shop.chamber_name || shop.shop_name,
+        latitude: shop.latitude === "" ? null : Number(shop.latitude),
+        longitude: shop.longitude === "" ? null : Number(shop.longitude),
         consultation_fee: shop.consultation_fee === "" ? null : Number(shop.consultation_fee)
       };
       const { data, error: saveError } = shopId
@@ -149,6 +169,52 @@ export default function ShopSettingsPage() {
               <div><Label>হোয়াটসঅ্যাপ</Label><Input value={shop.whatsapp_number || ""} onChange={e => update("whatsapp_number", e.target.value)} /></div>
             </div>
             <div><Label>ঠিকানা</Label><Input value={shop.address || ""} onChange={e => update("address", e.target.value)} /></div>
+            <div className="rounded-xl border border-primary/15 bg-primary/5 p-4">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <div>
+                  <p className="text-sm font-semibold">চেম্বারের সঠিক অবস্থান</p>
+                  <p className="mt-0.5 text-xs text-muted-foreground">রোগীর অবস্থান থেকে দূরত্ব দেখানোর জন্য এই অবস্থান ব্যবহার হবে।</p>
+                </div>
+                <Button type="button" variant="outline" size="sm" onClick={useCurrentLocation}>
+                  <Navigation className="h-4 w-4" /> বর্তমান অবস্থান ব্যবহার করুন
+                </Button>
+              </div>
+              <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                <div><Label>Latitude</Label><Input type="number" step="any" value={shop.latitude || ""} onChange={e => update("latitude", e.target.value)} placeholder="24.4539" /></div>
+                <div><Label>Longitude</Label><Input type="number" step="any" value={shop.longitude || ""} onChange={e => update("longitude", e.target.value)} placeholder="89.7000" /></div>
+              </div>
+            </div>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div>
+                <Label>জেলা</Label>
+                <select
+                  value={shop.district || "সিরাজগঞ্জ"}
+                  onChange={e => update("district", e.target.value)}
+                  className="mt-1 h-10 w-full rounded-lg border border-input bg-card px-3 text-sm"
+                >
+                  <option value="সিরাজগঞ্জ">সিরাজগঞ্জ</option>
+                </select>
+              </div>
+              <div>
+                <Label>উপজেলা</Label>
+                <select
+                  value={shop.upazila || ""}
+                  onChange={e => update("upazila", e.target.value)}
+                  className="mt-1 h-10 w-full rounded-lg border border-input bg-card px-3 text-sm"
+                >
+                  <option value="">উপজেলা নির্বাচন করুন</option>
+                  <option>সিরাজগঞ্জ সদর</option>
+                  <option>বেলকুচি</option>
+                  <option>চৌহালী</option>
+                  <option>কামারখন্দ</option>
+                  <option>কাজীপুর</option>
+                  <option>রায়গঞ্জ</option>
+                  <option>শাহজাদপুর</option>
+                  <option>তাড়াশ</option>
+                  <option>উল্লাপাড়া</option>
+                </select>
+              </div>
+            </div>
             <div><Label>গুগল ম্যাপ লিংক</Label><Input value={shop.google_map_link || ""} onChange={e => update("google_map_link", e.target.value)} /></div>
             <div><Label>ফেসবুক লিংক</Label><Input value={shop.facebook_link || ""} onChange={e => update("facebook_link", e.target.value)} /></div>
           </CardContent>

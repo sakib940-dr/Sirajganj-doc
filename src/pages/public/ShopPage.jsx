@@ -1,6 +1,6 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { Phone, MapPin, Facebook, Map, MessageCircle, Store, Package, Heart } from "lucide-react";
+import { Phone, MapPin, Facebook, Map, MessageCircle, Store, Package, Heart, Navigation, Globe2 } from "lucide-react";
 import { useShopBySlug } from "@/hooks/useShops";
 import { supabase } from "@/lib/supabaseClient";
 import LoadingSpinner from "@/components/shared/LoadingSpinner.jsx";
@@ -60,9 +60,17 @@ export default function ShopPage() {
     );
   }
 
+  const website = { enabled: true, hero_title: shop.shop_name, hero_subtitle: "সিরাজগঞ্জের রোগীদের জন্য বিশ্বস্ত চিকিৎসা সেবা", about_title: "আমাদের সম্পর্কে", contact_title: "যোগাযোগ ও দিকনির্দেশনা", show_doctors: true, show_gallery: true, show_about: true, cta_text: "অ্যাপয়েন্টমেন্ট নিন", ...(shop.website_config || {}) };
+  const directionUrl = shop.google_map_link || (shop.address ? `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(shop.address)}` : "");
+
+  if (website.enabled === false) {
+    return <div className="container py-16"><EmptyState icon={Globe2} title="ওয়েবসাইটটি বর্তমানে বন্ধ" description="চেম্বার / হাসপাতাল কর্তৃপক্ষ এই পাবলিক পেজটি সাময়িকভাবে বন্ধ রেখেছেন।" /></div>;
+  }
+
   return (
     <div>
       <div className="h-40 w-full bg-secondary md:h-64">
+
         {shop.banner_url && <img src={shop.banner_url} alt="" className="h-full w-full object-cover" />}
       </div>
 
@@ -76,9 +84,8 @@ export default function ShopPage() {
             )}
           </div>
           <div className="flex-1">
-            <h1 className="text-2xl font-bold" style={{ fontFamily: "'Tiro Bangla', serif" }}>
-              {shop.shop_name}
-            </h1>
+            <h1 className="text-2xl font-bold" style={{ fontFamily: "'Tiro Bangla', serif" }}>{website.hero_title || shop.shop_name}</h1>
+            {website.hero_subtitle && <p className="mt-1 text-sm text-primary/80">{website.hero_subtitle}</p>}
             {shop.about && <p className="mt-1 max-w-2xl text-sm text-muted-foreground">{shop.about}</p>}
           </div>
           <button
@@ -122,14 +129,14 @@ export default function ShopPage() {
                 <MapPin className="h-4 w-4 shrink-0 text-primary" /> {shop.address}
               </p>
             )}
-            {shop.google_map_link && (
+            {directionUrl && (
               <a
-                href={shop.google_map_link}
+                href={directionUrl}
                 target="_blank"
                 rel="noreferrer"
-                className="flex items-center gap-2 text-sm text-foreground hover:text-primary"
+                className="inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground shadow-sm hover:opacity-95"
               >
-                <Map className="h-4 w-4 text-primary" /> ম্যাপে দেখুন
+                <Navigation className="h-4 w-4" /> দিকনির্দেশনা
               </a>
             )}
             {shop.facebook_link && (
@@ -145,7 +152,8 @@ export default function ShopPage() {
           </div>
 
           <div className="md:col-span-2">
-            <h3 className="mb-3 font-semibold">ডাক্তার প্রোফাইল</h3>
+            {website.show_about && shop.about && <section className="mb-6 rounded-2xl border bg-card p-5"><h3 className="mb-2 font-semibold">{website.about_title}</h3><p className="whitespace-pre-line text-sm leading-relaxed text-muted-foreground">{shop.about}</p></section>}
+            {website.show_doctors && <><h3 className="mb-3 font-semibold">ডাক্তার প্রোফাইল</h3>
             {productsLoading ? (
               <ProductGridSkeleton count={6} className="sm:grid-cols-3 md:grid-cols-3" />
             ) : products.length === 0 ? (
@@ -157,10 +165,11 @@ export default function ShopPage() {
                 ))}
               </div>
             )}
+            </>}
           </div>
         </div>
 
-        {gallery.length > 0 && (
+        {website.show_gallery && gallery.length > 0 && (
           <div className="mt-8">
             <h3 className="mb-3 font-semibold">গ্যালারি</h3>
             <div className="grid grid-cols-3 gap-2 sm:grid-cols-4 md:grid-cols-6">

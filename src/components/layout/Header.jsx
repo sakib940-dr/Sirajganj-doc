@@ -96,7 +96,7 @@ export default function Header() {
           <Input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="যেমন: হৃদরোগের ডাক্তার, চোখের ডাক্তার..."
+            placeholder="যেমন: হৃদরোগের ডাক্তার, শিশু বিশেষজ্ঞ, সিরাজগঞ্জ সদর..."
             className="h-10 rounded-full border-border/80 bg-secondary/40 pl-10 shadow-none transition-colors focus-visible:bg-background"
           />
         </form>
