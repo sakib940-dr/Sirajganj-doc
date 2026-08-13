@@ -153,21 +153,68 @@ export default function ShopPage() {
 
           <div className="md:col-span-2">
             {website.show_about && shop.about && <section className="mb-6 rounded-2xl border bg-card p-5"><h3 className="mb-2 font-semibold">{website.about_title}</h3><p className="whitespace-pre-line text-sm leading-relaxed text-muted-foreground">{shop.about}</p></section>}
-            {website.show_doctors && <><h3 className="mb-3 font-semibold">ডাক্তার প্রোফাইল</h3>
-            {productsLoading ? (
-              <ProductGridSkeleton count={6} className="sm:grid-cols-3 md:grid-cols-3" />
-            ) : products.length === 0 ? (
-              <EmptyState icon={Package} title="এই চেম্বারে এখনো কোনো ডাক্তার প্রোফাইল যোগ করা হয়নি" />
-            ) : (
-              <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
-                {products.map((p) => (
-                  <ProductCard key={p.id} product={p} />
-                ))}
-              </div>
+            {website.show_doctors && (
+              <>
+                <div className="mb-3 flex items-center justify-between">
+                  <h3 className="font-semibold">ডাক্তার প্রোফাইল</h3>
+                  {products.length > 0 && (
+                    <span className="text-xs text-muted-foreground">{products.length} জন</span>
+                  )}
+                </div>
+                {productsLoading ? (
+                  <div className="space-y-3">
+                    {Array.from({ length: 4 }).map((_, i) => (
+                      <div key={i} className="h-[9.25rem] animate-pulse rounded-2xl border border-border bg-secondary/60" />
+                    ))}
+                  </div>
+                ) : products.length === 0 ? (
+                  <EmptyState icon={Package} title="এই চেম্বারে এখনো কোনো ডাক্তার প্রোফাইল যোগ করা হয়নি" />
+                ) : (
+                  <div className="flex flex-col gap-3">
+                    {products.map((p) => (
+                      <ProductCard
+                        key={p.id}
+                        product={p}
+                        variant="horizontal"
+                        className="w-full sm:w-full"
+                      />
+                    ))}
+                  </div>
+                )}
+              </>
             )}
-            </>}
           </div>
         </div>
+
+      {/* Chamber/Hospital location — placed below the doctor list so visitors can open directions easily. */}
+      {(shop.address || directionUrl) && (
+        <div className="container pb-8">
+          <div className="rounded-2xl border border-border bg-card p-5 shadow-sm">
+            <div className="flex items-start gap-3">
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                <MapPin className="h-5 w-5" />
+              </span>
+              <div className="min-w-0 flex-1">
+                <h3 className="font-semibold">চেম্বার / হাসপাতালের অবস্থান</h3>
+                {shop.address && (
+                  <p className="mt-1 text-sm leading-6 text-muted-foreground">{shop.address}</p>
+                )}
+                {directionUrl && (
+                  <a
+                    href={directionUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="mt-3 inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground shadow-sm hover:opacity-95"
+                  >
+                    <Navigation className="h-4 w-4" />
+                    গুগল ম্যাপে দিকনির্দেশনা দেখুন
+                  </a>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
         {website.show_gallery && gallery.length > 0 && (
           <div className="mt-8">

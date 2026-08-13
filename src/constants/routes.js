@@ -19,6 +19,9 @@ export const ROUTES = {
   FAQ: "/faq",
   HELP: "/help",
   FEEDBACK: "/feedback",
+  BLOOD_BANK: "/blood-bank",
+  BLOOD_DONOR: "/blood-donor",
+  AMBULANCE: "/ambulance",
 
   DASHBOARD: "/dashboard",
   DASHBOARD_PERSONAL: "/dashboard/personal-details",
@@ -46,6 +49,7 @@ export const ROUTES = {
   ADMIN_PRODUCTS: "/admin/products",
   ADMIN_BANNERS: "/admin/banners",
   ADMIN_CMS: "/admin/cms",
+  ADMIN_AMBULANCE: "/admin/ambulance",
 };
 
 export const categoryPath = (slug) => `/category/${slug}`;

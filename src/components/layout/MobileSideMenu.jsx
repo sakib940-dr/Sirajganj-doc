@@ -16,6 +16,8 @@ import {
   Store,
   Globe2,
   Settings,
+  Droplets,
+  Ambulance,
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useMobileMenu } from "@/context/MobileMenuContext.jsx";
@@ -143,6 +145,17 @@ export default function MobileSideMenu() {
             </>
           ) : (
             <div className="space-y-0.5">
+              {isLoggedIn && role === ROLES.PATIENT && <>
+                <MenuLink to={ROUTES.BLOOD_BANK} icon={Droplets} label="রক্ত ব্যাংক" onClick={close} />
+                <MenuLink to={ROUTES.BLOOD_DONOR} icon={Droplets} label="স্বেচ্ছাসেবী রক্তদাতা" onClick={close} />
+                <MenuLink to={ROUTES.AMBULANCE} icon={Ambulance} label="অ্যাম্বুলেন্স" onClick={close} />
+                <div className="my-2 border-t border-border" />
+              </>}
+              {!isLoggedIn && <>
+                <MenuLink to={ROUTES.BLOOD_BANK} icon={Droplets} label="রক্ত ব্যাংক" onClick={close} />
+                <MenuLink to={ROUTES.AMBULANCE} icon={Ambulance} label="অ্যাম্বুলেন্স" onClick={close} />
+                <div className="my-2 border-t border-border" />
+              </>}
               <MenuLink to={ROUTES.HELP} icon={HelpCircle} label="সাহায্য" onClick={close} />
               <MenuLink to={ROUTES.ABOUT} icon={Info} label="আমাদের সম্পর্কে" onClick={close} />
               <MenuLink to={ROUTES.FEEDBACK} icon={MessageSquareHeart} label="মতামত জানান" onClick={close} />

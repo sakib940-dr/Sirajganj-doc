@@ -27,6 +27,9 @@ import PrivacyPage from "@/pages/public/PrivacyPage.jsx";
 import FaqPage from "@/pages/public/FaqPage.jsx";
 import HelpPage from "@/pages/public/HelpPage.jsx";
 import FeedbackPage from "@/pages/public/FeedbackPage.jsx";
+import BloodBankPage from "@/pages/public/BloodBankPage.jsx";
+import AmbulancePage from "@/pages/public/AmbulancePage.jsx";
+import BloodDonorPage from "@/pages/public/BloodDonorPage.jsx";
 import PatientAppointmentsPage from "@/pages/public/AppointmentsPage.jsx";
 import PatientDashboardPage from "@/pages/public/PatientDashboardPage.jsx";
 import SettingsPage from "@/pages/shared/SettingsPage.jsx";
@@ -55,6 +58,7 @@ import CategoryManagePage from "@/pages/admin/CategoryManagePage.jsx";
 import ProductManagePage from "@/pages/admin/ProductManagePage.jsx";
 import BannerManagePage from "@/pages/admin/BannerManagePage.jsx";
 import CMSPage from "@/pages/admin/cms/CMSPage.jsx";
+import AmbulanceManagePage from "@/pages/admin/AmbulanceManagePage.jsx";
 
 function RoleAwareHome() {
   const { role } = useAuth();
@@ -93,6 +97,9 @@ export default function AppRoutes() {
         <Route path={ROUTES.FAQ} element={<FaqPage />} />
         <Route path={ROUTES.HELP} element={<HelpPage />} />
         <Route path={ROUTES.FEEDBACK} element={<FeedbackPage />} />
+        <Route path={ROUTES.BLOOD_BANK} element={<BloodBankPage />} />
+        <Route path={ROUTES.AMBULANCE} element={<AmbulancePage />} />
+        <Route path={ROUTES.BLOOD_DONOR} element={<ProtectedRoute requiredRole={ROLES.PATIENT}><BloodDonorPage /></ProtectedRoute>} />
         <Route
           path={ROUTES.SAVED}
           element={
@@ -194,6 +201,7 @@ export default function AppRoutes() {
             </ProtectedRoute>
           }
         />
+        <Route path={ROUTES.ADMIN_AMBULANCE} element={<AmbulanceManagePage />} />
         <Route
           path={ROUTES.ADMIN_CMS}
           element={

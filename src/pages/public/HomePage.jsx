@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { Search, Tag, Store, Package, Flame, Sparkles, MapPin } from "lucide-react";
+import { Search, Tag, Store, Package, Flame, Sparkles, MapPin, Droplets, Ambulance } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import CategoryChipsRow from "@/components/shared/CategoryChipsRow.jsx";
@@ -154,6 +154,13 @@ export default function HomePage() {
         ) : (
           <CategoryChipsRow categories={categories} twoRow={categories.length > 6} />
         )}
+      </section>
+
+      <section className="container pb-2">
+        <div className="grid grid-cols-2 gap-3">
+          <a href={ROUTES.BLOOD_BANK} className="rounded-2xl border bg-card p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"><Droplets className="h-6 w-6 text-red-600"/><h2 className="mt-2 font-bold">রক্ত ব্যাংক</h2><p className="mt-1 text-xs text-muted-foreground">কাছাকাছি স্বেচ্ছাসেবী রক্তদাতা খুঁজুন</p></a>
+          <a href={ROUTES.AMBULANCE} className="rounded-2xl border bg-card p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"><Ambulance className="h-6 w-6 text-primary"/><h2 className="mt-2 font-bold">অ্যাম্বুলেন্স</h2><p className="mt-1 text-xs text-muted-foreground">জরুরি অ্যাম্বুলেন্স সার্ভিস খুঁজুন</p></a>
+        </div>
       </section>
 
       {/* Visitor location — ক্যাটাগরির পরেই এলাকার ডাক্তার */}

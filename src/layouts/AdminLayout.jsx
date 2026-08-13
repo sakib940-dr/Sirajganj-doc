@@ -14,6 +14,7 @@ import {
   X,
   LogOut,
   Shield,
+  Ambulance,
 } from "lucide-react";
 import AdminSidebarNav from "@/components/layout/AdminSidebarNav.jsx";
 import { ROUTES } from "@/constants/routes";
@@ -58,6 +59,7 @@ export default function AdminLayout() {
             {
               title: "সাইট কনফিগারেশন",
               items: [
+                { to: ROUTES.ADMIN_AMBULANCE, label: "অ্যাম্বুলেন্স", icon: Ambulance },
                 { to: ROUTES.ADMIN_CMS, label: "CMS প্যানেল", icon: Palette },
                 { to: ROUTES.ADMIN_BANNERS, label: "ব্যানার (দ্রুত অ্যাক্সেস)", icon: GalleryHorizontal },
               ],
