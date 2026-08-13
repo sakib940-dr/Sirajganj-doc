@@ -1,165 +1,100 @@
-import { useMemo } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import {
-  Package,
-  CheckCircle2,
-  PackageX,
-  Eye,
-  Heart,
-  MousePointerClick,
-  ArrowUpRight,
-  Store,
-  TrendingUp,
-} from "lucide-react";
+import { CalendarDays, Eye, Heart, MapPin, UserRound, ArrowUpRight, Clock3 } from "lucide-react";
+import { supabase } from "@/lib/supabaseClient";
 import { useAuth } from "@/hooks/useAuth";
-import { useSellerProductStats } from "@/hooks/useSellerProductStats";
 import PendingApprovalNotice from "@/components/seller/PendingApprovalNotice.jsx";
-import StatCard from "@/components/shared/StatCard.jsx";
-import BarStatChart from "@/components/shared/charts/BarStatChart.jsx";
-import DonutStatChart from "@/components/shared/charts/DonutStatChart.jsx";
 import { ROUTES } from "@/constants/routes";
 import { ROLES, SELLER_STATUS, isAdminOrAbove } from "@/constants/roles";
 
+function Metric({ icon: Icon, label, value, href }) {
+  const content = (
+    <div className="rounded-2xl border border-border bg-card p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
+      <div className="flex items-start justify-between gap-3">
+        <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
+          <Icon className="h-5 w-5" />
+        </span>
+        {href && <ArrowUpRight className="h-4 w-4 text-muted-foreground" />}
+      </div>
+      <p className="mt-4 text-2xl font-bold">{value}</p>
+      <p className="mt-1 text-xs text-muted-foreground">{label}</p>
+    </div>
+  );
+  return href ? <Link to={href}>{content}</Link> : content;
+}
+
 export default function DashboardHome() {
   const { user, role, sellerStatus, profile } = useAuth();
+  const [data, setData] = useState({ doctors: 0, appointments: 0, pending: 0, views: 0, saves: 0, loading: true });
 
-  const isApprovedSeller =
-    isAdminOrAbove(role) || (role === ROLES.DOCTOR && sellerStatus === SELLER_STATUS.APPROVED);
+  const approved = isAdminOrAbove(role) || (role === ROLES.DOCTOR && sellerStatus === SELLER_STATUS.APPROVED);
 
-  const { products, stats, mostViewed, loading } = useSellerProductStats({
-    user,
-    enabled: isApprovedSeller && !!user,
-  });
+  useEffect(() => {
+    if (!user || !approved) return;
+    let active = true;
+    (async () => {
+      const ownerFilter = role === ROLES.HOSPITAL ? { owner: user.id } : { seller_id: user.id };
+      const [productsRes, appointmentsRes, pendingRes] = await Promise.all([
+        supabase.from("products").select("id, view_count, save_count", { count: "exact" }).match(ownerFilter),
+        supabase.from("appointments").select("id, status", { count: "exact" }).match({ ...(role === ROLES.HOSPITAL ? { hospital_id: user.id } : { doctor_id: user.id }), status: "pending" }),
+        supabase.from("seller_verifications").select("id", { count: "exact" }).match({ seller_id: user.id, status: "pending" }),
+      ]);
+      const rows = productsRes.data || [];
+      if (active) setData({
+        doctors: productsRes.count ?? rows.length,
+        appointments: appointmentsRes.count ?? 0,
+        pending: pendingRes.count ?? 0,
+        views: rows.reduce((s, r) => s + Number(r.view_count || 0), 0),
+        saves: rows.reduce((s, r) => s + Number(r.save_count || 0), 0),
+        loading: false,
+      });
+    })();
+    return () => { active = false; };
+  }, [user?.id, role, approved]);
 
-  const topProductsChartData = useMemo(
-    () =>
-      mostViewed.map((p) => ({
-        label: p.name,
-        value: p.view_count ?? 0,
-      })),
-    [mostViewed]
-  );
+  if (!approved) return <PendingApprovalNotice status={sellerStatus} />;
 
-  const statusChartData = useMemo(
-    () => [
-      { label: "সক্রিয় ডাক্তার প্রোফাইল", value: stats.activeProducts },
-      { label: "নিষ্ক্রিয় ডাক্তার প্রোফাইল", value: stats.inactiveProducts, color: "hsl(var(--muted-foreground))" },
-    ],
-    [stats.activeProducts, stats.inactiveProducts]
-  );
-
-  if (!isApprovedSeller) {
-    return <PendingApprovalNotice status={sellerStatus} />;
-  }
-
+  const isHospital = role === ROLES.HOSPITAL;
   return (
     <div className="space-y-6">
-      {/* ================= স্বাগতম ব্যানার ================= */}
-      <div className="rounded-2xl border border-border bg-gradient-to-br from-primary/5 via-card to-card p-5 sm:p-6">
-        <h1
-          className="text-lg font-bold sm:text-xl"
-          style={{ fontFamily: "'Tiro Bangla', serif" }}
-        >
-          স্বাগতম, {profile?.full_name || "ডাক্তার"}
-        </h1>
-        <p className="mt-1 text-sm text-muted-foreground">আপনার চেম্বার এখান থেকে পরিচালনা করুন</p>
-      </div>
-
-      {/* ================= সামারি কার্ড: এক নজরে সবকিছু ================= */}
-      <div>
-        <div className="mb-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      <section className="rounded-3xl border border-border bg-card p-5 shadow-sm sm:p-7">
+        <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h2 className="text-sm font-semibold text-muted-foreground sm:text-base">
-              {role === "hospital" ? "আপনার চেম্বার/হাসপাতালের সারসংক্ষেপ" : "আপনার চেম্বারের সারসংক্ষেপ"}
-            </h2>
-            <p className="mt-0.5 text-xs text-muted-foreground">ডাক্তার প্রোফাইল, ভিউ ও রোগীর অনুরোধ এক নজরে দেখুন</p>
+            <p className="text-xs font-semibold text-primary">{isHospital ? "চেম্বার / হাসপাতাল" : "ডাক্তার প্যানেল"}</p>
+            <h1 className="mt-1 text-2xl font-bold tracking-tight sm:text-3xl">স্বাগতম, {profile?.full_name || (isHospital ? "চেম্বার" : "ডাক্তার")}</h1>
+            <p className="mt-2 max-w-xl text-sm text-muted-foreground">আপনার প্রোফাইল, রোগীর অ্যাপয়েন্টমেন্ট এবং চেম্বারের তথ্য এক জায়গা থেকে পরিচালনা করুন।</p>
           </div>
-          <div className="flex flex-wrap gap-2">
-            <Link to={ROUTES.DASHBOARD_APPOINTMENTS} className="inline-flex items-center justify-center rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground shadow-sm">
-              অ্যাপয়েন্টমেন্টের অনুরোধ
-            </Link>
-            <Link to={ROUTES.DASHBOARD_ANALYTICS} className="inline-flex items-center gap-1 rounded-xl border border-border bg-card px-4 py-2.5 text-sm font-medium text-foreground">
-              পূর্ণ অ্যানালিটিক্স <ArrowUpRight className="h-3.5 w-3.5" />
-            </Link>
-          </div>
+          <Link to={ROUTES.DASHBOARD_APPOINTMENTS} className="inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground shadow-sm">
+            <CalendarDays className="h-4 w-4" /> অ্যাপয়েন্টমেন্ট দেখুন
+          </Link>
         </div>
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-6">
-          <StatCard title="মোট ডাক্তার প্রোফাইল" icon={Package} value={stats.totalProducts} loading={loading} />
-          <StatCard
-            title="সক্রিয় ডাক্তার প্রোফাইল"
-            icon={CheckCircle2}
-            value={stats.activeProducts}
-            loading={loading}
-          />
-          <StatCard
-            title="স্টক শেষ"
-            icon={PackageX}
-            value={stats.outOfStockProducts}
-            loading={loading}
-            variant={stats.outOfStockProducts > 0 ? "destructive" : "primary"}
-          />
-          <StatCard
-            title="মোট ভিউ"
-            icon={Eye}
-            value={stats.views}
-            loading={loading}
-            variant="accent"
-          />
-          <StatCard
-            title="মোট সেভ"
-            icon={Heart}
-            value={stats.saves}
-            loading={loading}
-            variant="accent"
-          />
-          <StatCard
-            title="অর্ডার ক্লিক"
-            icon={MousePointerClick}
-            value={stats.clicks}
-            loading={loading}
-            variant="accent"
-          />
-        </div>
-      </div>
+      </section>
 
-      {/* ================= চার্ট: এক নজরে ভিজ্যুয়াল ওভারভিউ ================= */}
-      {(loading || products.length > 0) && (
-        <div className="grid gap-4 lg:grid-cols-2">
-          <BarStatChart
-            title="সর্বাধিক দেখা ডাক্তার প্রোফাইল"
-            icon={TrendingUp}
-            description="ভিউ অনুযায়ী টপ ৫ ডাক্তার প্রোফাইল"
-            loading={loading}
-            emptyLabel="এখনো কোনো ভিউ নেই"
-            data={topProductsChartData}
-            valueLabel="ভিউ"
-          />
-          <DonutStatChart
-            title="ডাক্তার প্রোফাইলের অবস্থা"
-            icon={Package}
-            description="সক্রিয় বনাম নিষ্ক্রিয় ডাক্তার প্রোফাইল"
-            loading={loading}
-            emptyLabel="এখনো কোনো ডাক্তার প্রোফাইল নেই"
-            data={statusChartData}
-            centerLabel="মোট ডাক্তার প্রোফাইল"
-          />
-        </div>
-      )}
+      <section className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+        <Metric icon={UserRound} label={isHospital ? "ডাক্তার প্রোফাইল" : "আমার প্রোফাইল"} value={data.doctors} href={isHospital ? ROUTES.DASHBOARD_PRODUCTS : ROUTES.DASHBOARD_PERSONAL} />
+        <Metric icon={CalendarDays} label="অপেক্ষমাণ অ্যাপয়েন্টমেন্ট" value={data.appointments} href={ROUTES.DASHBOARD_APPOINTMENTS} />
+        <Metric icon={Eye} label="প্রোফাইল ভিউ" value={data.views} />
+        <Metric icon={Heart} label="সংরক্ষণ" value={data.saves} />
+        <Metric icon={Clock3} label="অপেক্ষমাণ ভেরিফিকেশন" value={data.pending} href={ROUTES.DASHBOARD_VERIFICATION} />
+      </section>
 
-      {/* ================= শপ সেটআপ CTA ================= */}
-      <div className="flex flex-col gap-3 rounded-xl border border-accent/40 bg-accent/10 p-4 text-sm sm:flex-row sm:items-center sm:justify-between">
-        <span className="flex items-center gap-2">
-          <Store className="h-4 w-4 shrink-0 text-accent" />
-          {role === "hospital" ? "আপনার চেম্বার/হাসপাতালের তথ্য পূরণ বা হালনাগাদ করতে চান?" : "আপনার চেম্বারের তথ্য পূরণ বা হালনাগাদ করতে চান?"}
-        </span>
-        <Link
-          to={ROUTES.DASHBOARD_SHOP}
-          className="inline-flex shrink-0 items-center gap-1 font-medium text-primary hover:underline"
-        >
-          এখনই দেখুন
-          <ArrowUpRight className="h-3.5 w-3.5" />
+      <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <Link to={ROUTES.DASHBOARD_PERSONAL} className="group rounded-2xl border border-border bg-card p-5 shadow-sm transition hover:border-primary/40 hover:shadow-md">
+          <UserRound className="h-5 w-5 text-primary" />
+          <h2 className="mt-4 font-semibold">ব্যক্তিগত তথ্য</h2>
+          <p className="mt-1 text-sm text-muted-foreground">নাম, ছবি, যোগাযোগ ও পেশাগত তথ্য আপডেট করুন।</p>
         </Link>
-      </div>
+        <Link to={ROUTES.DASHBOARD_SHOP} className="group rounded-2xl border border-border bg-card p-5 shadow-sm transition hover:border-primary/40 hover:shadow-md">
+          <MapPin className="h-5 w-5 text-primary" />
+          <h2 className="mt-4 font-semibold">চেম্বার / হাসপাতাল</h2>
+          <p className="mt-1 text-sm text-muted-foreground">ঠিকানা, অবস্থান ও চেম্বারের তথ্য পরিচালনা করুন।</p>
+        </Link>
+        <Link to={ROUTES.DASHBOARD_WEBSITE} className="group rounded-2xl border border-border bg-card p-5 shadow-sm transition hover:border-primary/40 hover:shadow-md">
+          <Eye className="h-5 w-5 text-primary" />
+          <h2 className="mt-4 font-semibold">ওয়েবসাইট</h2>
+          <p className="mt-1 text-sm text-muted-foreground">আপনার public chamber page সাজান ও preview দেখুন।</p>
+        </Link>
+      </section>
     </div>
   );
 }

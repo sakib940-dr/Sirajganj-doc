@@ -85,16 +85,16 @@ export default function AdminLayout() {
     <div className="min-h-screen bg-muted/40">
       <div className="flex min-h-screen">
         {/* Desktop fixed sidebar */}
-        <aside className="sticky top-0 hidden h-screen w-64 shrink-0 flex-col bg-primary text-primary-foreground lg:flex">
-          <div className="flex h-16 items-center gap-2.5 border-b border-primary-foreground/10 px-5">
-            <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-accent text-accent-foreground">
+        <aside className="sticky top-0 hidden h-screen w-64 shrink-0 flex-col border-r border-border bg-card lg:flex">
+          <div className="flex h-16 items-center gap-2.5 border-b border-border px-5">
+            <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary text-primary-foreground">
               <Shield className="h-5 w-5" />
             </span>
             <div className="min-w-0">
               <p className="truncate text-sm font-bold" style={{ fontFamily: "'Tiro Bangla', serif" }}>
                 অ্যাডমিন প্যানেল
               </p>
-              <p className="truncate text-[11px] text-primary-foreground/55">
+              <p className="truncate text-[11px] text-muted-foreground">
                 অ্যাডমিন অ্যাক্সেস
               </p>
             </div>
@@ -104,26 +104,26 @@ export default function AdminLayout() {
             <AdminSidebarNav groups={groups} />
           </div>
 
-          <div className="border-t border-primary-foreground/10 p-3">
+          <div className="border-t border-border p-3">
             <div className="mb-2 flex items-center gap-2.5 rounded-lg px-2 py-2">
-              <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary-foreground/10 text-xs font-semibold">
+              <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold">
                 {(profile?.full_name || "A").charAt(0)}
               </span>
               <div className="min-w-0">
                 <p className="truncate text-sm font-medium">{profile?.full_name || "অ্যাডমিন"}</p>
-                <p className="truncate text-[11px] text-primary-foreground/55">{ROLE_LABEL_BN[role]}</p>
+                <p className="truncate text-[11px] text-muted-foreground">{ROLE_LABEL_BN[role]}</p>
               </div>
             </div>
             <Link
               to={ROUTES.ADMIN_PERSONAL}
-              className="flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-primary-foreground/75 transition-colors hover:bg-primary-foreground/10 hover:text-primary-foreground"
+              className="flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-foreground/75 transition-colors hover:bg-secondary hover:text-foreground"
             >
               <KeyRound className="h-4 w-4" />
               ব্যক্তিগত তথ্য
             </Link>
             <Link
               to={ROUTES.ADMIN_SETTINGS}
-              className="flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-primary-foreground/75 transition-colors hover:bg-primary-foreground/10 hover:text-primary-foreground"
+              className="flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-foreground/75 transition-colors hover:bg-secondary hover:text-foreground"
             >
               <Palette className="h-4 w-4" />
               সেটিংস
@@ -131,7 +131,7 @@ export default function AdminLayout() {
             <button
               type="button"
               onClick={signOut}
-              className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-primary-foreground/75 transition-colors hover:bg-destructive/20 hover:text-primary-foreground"
+              className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-foreground/75 transition-colors hover:bg-destructive/20 hover:text-primary-foreground"
             >
               <LogOut className="h-4 w-4" />
               লগ আউট
@@ -146,20 +146,20 @@ export default function AdminLayout() {
         >
           <div
             className={cn(
-              "absolute inset-0 bg-black/50 transition-opacity",
+              "absolute inset-0 bg-black/40 transition-opacity",
               drawerOpen ? "opacity-100" : "opacity-0"
             )}
             onClick={() => setDrawerOpen(false)}
           />
           <div
             className={cn(
-              "absolute inset-y-0 left-0 flex w-72 max-w-[82%] flex-col bg-primary text-primary-foreground shadow-xl transition-transform duration-200",
+              "absolute inset-y-0 left-0 flex w-72 max-w-[82%] flex-col bg-card text-foreground shadow-xl transition-transform duration-200",
               drawerOpen ? "translate-x-0" : "-translate-x-full"
             )}
           >
-            <div className="flex h-14 items-center justify-between border-b border-primary-foreground/10 px-4">
+            <div className="flex h-14 items-center justify-between border-b border-border px-4">
               <div className="flex items-center gap-2">
-                <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-accent text-accent-foreground">
+                <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
                   <Shield className="h-4 w-4" />
                 </span>
                 <p className="text-sm font-bold" style={{ fontFamily: "'Tiro Bangla', serif" }}>
@@ -169,7 +169,7 @@ export default function AdminLayout() {
               <button
                 type="button"
                 onClick={() => setDrawerOpen(false)}
-                className="flex h-8 w-8 items-center justify-center rounded-lg text-primary-foreground/80 hover:bg-primary-foreground/10"
+                className="flex h-8 w-8 items-center justify-center rounded-lg text-foreground/80 hover:bg-primary/10"
                 aria-label="মেনু বন্ধ করুন"
               >
                 <X className="h-4 w-4" />
@@ -178,11 +178,11 @@ export default function AdminLayout() {
             <div className="flex-1 overflow-y-auto px-3 py-4">
               <AdminSidebarNav groups={groups} onNavigate={() => setDrawerOpen(false)} />
             </div>
-            <div className="border-t border-primary-foreground/10 p-3">
+            <div className="border-t border-border p-3">
               <Link
                 to={ROUTES.ADMIN_PERSONAL}
                 onClick={() => setDrawerOpen(false)}
-                className="flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-primary-foreground/75 hover:bg-primary-foreground/10 hover:text-primary-foreground"
+                className="flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-foreground/75 hover:bg-secondary hover:text-foreground"
               >
                 <KeyRound className="h-4 w-4" />
                 ব্যক্তিগত তথ্য
@@ -190,7 +190,7 @@ export default function AdminLayout() {
               <Link
                 to={ROUTES.ADMIN_SETTINGS}
                 onClick={() => setDrawerOpen(false)}
-                className="flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-primary-foreground/75 hover:bg-primary-foreground/10 hover:text-primary-foreground"
+                className="flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-foreground/75 hover:bg-secondary hover:text-foreground"
               >
                 <Palette className="h-4 w-4" />
                 সেটিংস
@@ -198,7 +198,7 @@ export default function AdminLayout() {
               <button
                 type="button"
                 onClick={signOut}
-                className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-primary-foreground/75 hover:bg-destructive/20 hover:text-primary-foreground"
+                className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-foreground/75 hover:bg-destructive/20 hover:text-primary-foreground"
               >
                 <LogOut className="h-4 w-4" />
                 লগ আউট

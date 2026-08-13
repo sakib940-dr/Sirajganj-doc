@@ -26,8 +26,6 @@ const navItems = [
   { to: ROUTES.DASHBOARD_WEBSITE, label: "ওয়েবসাইট", icon: Globe2 },
   { to: ROUTES.DASHBOARD, label: "ড্যাশবোর্ড", icon: LayoutDashboard, end: true },
   { to: ROUTES.DASHBOARD_APPOINTMENTS, label: "অ্যাপয়েন্টমেন্ট", icon: CalendarDays },
-  { to: ROUTES.DASHBOARD_ANALYTICS, label: "অ্যানালিটিক্স", icon: TrendingUp },
-  { to: ROUTES.DASHBOARD_GALLERY, label: "গ্যালারি", icon: Images },
   { to: ROUTES.DASHBOARD_VERIFICATION, label: "ভেরিফিকেশন", icon: ShieldCheck },
   { to: ROUTES.DASHBOARD_SETTINGS, label: "সেটিংস", icon: Settings },
 ];

@@ -1,0 +1,12 @@
+STEP 16 SQL FIX
+
+The previous Step 16 SQL could fail because two policies already existed from Step 8.
+This fixed file is idempotent for those policies: it drops/recreates the affected policies.
+
+Run ONLY:
+supabase/step16_blood_ambulance.sql
+
+Do NOT run the old step16_blood_ambulance.sql from the previous ZIP.
+
+If Step 10/11 SQL was not run yet, run those first, then Step 16.
+If Step 10/11 already succeeded, do not rerun them.

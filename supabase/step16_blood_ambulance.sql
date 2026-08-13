@@ -146,20 +146,27 @@ grant execute on function public.create_blood_request(uuid,text,text,text,date,t
 alter table public.blood_requests enable row level security;
 alter table public.ambulance_services enable row level security;
 
+DROP POLICY IF EXISTS "blood_requests_select_participants" ON public.blood_requests;
 create policy "blood_requests_select_participants" on public.blood_requests
 for select using (requester_id=auth.uid() or donor_id=auth.uid() or public.is_admin_or_above());
+DROP POLICY IF EXISTS "blood_requests_update_participants" ON public.blood_requests;
 create policy "blood_requests_update_participants" on public.blood_requests
 for update using (donor_id=auth.uid() or requester_id=auth.uid() or public.is_admin_or_above())
 with check (donor_id=auth.uid() or requester_id=auth.uid() or public.is_admin_or_above());
+DROP POLICY IF EXISTS "blood_requests_delete_requester" ON public.blood_requests;
 create policy "blood_requests_delete_requester" on public.blood_requests
 for delete using (requester_id=auth.uid() or public.is_admin_or_above());
 
+DROP POLICY IF EXISTS "ambulance_public_read" ON public.ambulance_services;
 create policy "ambulance_public_read" on public.ambulance_services
 for select using (true);
+DROP POLICY IF EXISTS "ambulance_admin_insert" ON public.ambulance_services;
 create policy "ambulance_admin_insert" on public.ambulance_services
 for insert with check (public.is_admin_or_above());
+DROP POLICY IF EXISTS "ambulance_admin_update" ON public.ambulance_services;
 create policy "ambulance_admin_update" on public.ambulance_services
 for update using (public.is_admin_or_above()) with check (public.is_admin_or_above());
+DROP POLICY IF EXISTS "ambulance_admin_delete" ON public.ambulance_services;
 create policy "ambulance_admin_delete" on public.ambulance_services
 for delete using (public.is_admin_or_above());
 
@@ -193,10 +200,12 @@ returns boolean language sql security definer set search_path=public stable as $
 $$;
 
 drop policy if exists "shops_insert_approved_seller" on public.shops;
+DROP POLICY IF EXISTS "shops_insert_approved_provider" ON public.shops;
 create policy "shops_insert_approved_provider" on public.shops for insert with check
   (owner_id=auth.uid() and exists(select 1 from public.profiles where id=auth.uid() and role in ('doctor','hospital') and seller_status='approved' and account_status='active'));
 
 drop policy if exists "products_insert_own_shop" on public.products;
+DROP POLICY IF EXISTS "products_insert_own_provider_shop" ON public.products;
 create policy "products_insert_own_provider_shop" on public.products for insert with check
   (exists(select 1 from public.shops s join public.profiles owner on owner.id=s.owner_id where s.id=shop_id and s.owner_id=auth.uid() and owner.role in ('doctor','hospital') and owner.seller_status='approved' and owner.account_status='active'));
 
