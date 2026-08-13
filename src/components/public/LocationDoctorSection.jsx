@@ -10,6 +10,7 @@ export default function LocationDoctorSection({
   products,
   loading,
   viewAllTo,
+  showDistance = false,
 }) {
   const title = location.upazila
     ? `${location.upazila} এলাকার ডাক্তার`
@@ -96,6 +97,7 @@ export default function LocationDoctorSection({
           emptyTitle="এই এলাকায় এখনো কোনো ডাক্তার প্রোফাইল নেই"
           emptyDescription="অন্য উপজেলা বেছে নিয়ে ডাক্তার দেখতে পারেন।"
           viewAllTo={viewAllTo}
+          showDistance={showDistance}
         />
       )}
     </>

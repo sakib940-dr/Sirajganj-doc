@@ -6,7 +6,7 @@ import EmptyState from "@/components/shared/EmptyState.jsx";
 import { cn } from "@/lib/utils";
 
 export default function ProductRow({
-  id, title, subtitle, icon: Icon, products, loading, viewAllTo, emptyIcon, emptyTitle, emptyDescription, accentClassName,
+  id, title, subtitle, icon: Icon, products, loading, viewAllTo, emptyIcon, emptyTitle, emptyDescription, accentClassName, visitorLatitude, visitorLongitude, showDistance = false,
 }) {
   return (
     <section id={id} className="py-7 md:py-9">
@@ -36,7 +36,7 @@ export default function ProductRow({
       ) : (
         <div className="container">
           <div className="no-scrollbar -mx-4 flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-1">
-            {products.slice(0, 10).map((product) => <ProductCard key={product.id} product={product} className="snap-start" />)}
+            {products.slice(0, 10).map((product) => <ProductCard key={product.id} product={product} className="snap-start" distanceKm={showDistance ? product.distance_km : null} />)}
           </div>
         </div>
       )}

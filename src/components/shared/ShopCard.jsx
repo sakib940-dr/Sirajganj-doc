@@ -10,7 +10,7 @@ import { cn } from "@/lib/utils";
  * চেম্বার চেনার প্রধান ভিজ্যুয়াল অ্যাঙ্কর হয়ে থাকে। গ্রিড ও horizontal-scroll
  * রো (ShopRow) — দুই জায়গাতেই `className`-এ width দিয়ে ব্যবহারযোগ্য।
  */
-export default function ShopCard({ shop, className, visitorLatitude, visitorLongitude }) {
+export default function ShopCard({ shop, className, visitorLatitude, visitorLongitude, showDistance = true }) {
   const distanceKm = calculateDistanceKm(visitorLatitude, visitorLongitude, shop.latitude, shop.longitude);
   const distanceLabel = formatDistanceKm(distanceKm);
   return (
@@ -51,7 +51,7 @@ export default function ShopCard({ shop, className, visitorLatitude, visitorLong
               সরাসরি যোগাযোগ করা যাবে
             </p>
           ) : null}
-          {distanceLabel && (
+          {showDistance && shop.location_visibility !== false && distanceLabel && (
             <p className="mt-1 inline-flex items-center gap-1 text-[11px] font-semibold text-primary">
               <Navigation className="h-3 w-3" />
               {distanceLabel}

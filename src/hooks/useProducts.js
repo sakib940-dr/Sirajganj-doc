@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import { getSearchSynonyms, expandSearchTerms } from "@/lib/searchSynonyms";
+import { calculateDistanceKm } from "@/lib/geo";
 
 const PRODUCT_SELECT =
-  "*, shops:shop_id ( shop_name, chamber_name, slug, whatsapp_number, phone, address, district, upazila, google_map_link, facebook_link, messenger_link, visiting_days, visiting_time, consultation_fee, latitude, longitude ), categories:category_id ( name, slug )";
+  "*, shops:shop_id ( shop_name, chamber_name, slug, whatsapp_number, phone, address, district, upazila, google_map_link, facebook_link, messenger_link, visiting_days, visiting_time, consultation_fee, latitude, longitude, location_visibility ), categories:category_id ( name, slug )";
 
 export function useLatestProducts({ limit = 8 } = {}) {
   const [products, setProducts] = useState([]);
@@ -332,7 +333,7 @@ export function useRelatedProducts(categoryId, excludeProductId, { limit = 8 } =
  * নির্দিষ্ট জেলা/উপজেলার ডাক্তার প্রোফাইল।
  * Doctor-এর location তার Chamber/Hospital-এর location থেকে নেওয়া হয়।
  */
-export function useProductsByLocation({ district, upazila, limit = 50 } = {}) {
+export function useProductsByLocation({ district, upazila, limit = 50, visitorLatitude = null, visitorLongitude = null, visitorLocationSource = "" } = {}) {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(false);
 
@@ -376,7 +377,17 @@ export function useProductsByLocation({ district, upazila, limit = 50 } = {}) {
 
       if (!active) return;
 
-      setProducts(error ? [] : data ?? []);
+      const next = error ? [] : (data ?? []).map((product) => {
+        const lat = product?.shops?.latitude;
+        const lon = product?.shops?.longitude;
+        const distance_km = calculateDistanceKm(visitorLatitude, visitorLongitude, lat, lon);
+        return distance_km == null ? product : { ...product, distance_km, distance_approximate: visitorLocationSource !== "device" };
+      }).sort((a,b) => {
+        const ad = Number.isFinite(Number(a.distance_km)) ? Number(a.distance_km) : Number.POSITIVE_INFINITY;
+        const bd = Number.isFinite(Number(b.distance_km)) ? Number(b.distance_km) : Number.POSITIVE_INFINITY;
+        return ad - bd;
+      });
+      setProducts(next);
       setLoading(false);
     }
 
@@ -385,7 +396,7 @@ export function useProductsByLocation({ district, upazila, limit = 50 } = {}) {
     return () => {
       active = false;
     };
-  }, [district, upazila, limit]);
+  }, [district, upazila, limit, visitorLatitude, visitorLongitude, visitorLocationSource]);
 
   return { products, loading };
 }

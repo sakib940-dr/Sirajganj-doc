@@ -7,6 +7,7 @@ const DEFAULTS = {
   site_motto: "",
   site_logo_url: "/doctor-logo.svg",
   site_favicon_url: "",
+  show_location_distance: "true",
   // Hero section
   hero_title: "",
   hero_subtitle: "",

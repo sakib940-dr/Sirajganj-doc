@@ -16,7 +16,7 @@ import ImageUploader from "@/components/shared/ImageUploader.jsx";
  *   fields: Array<{
  *     key: string,
  *     label: string,
- *     type?: "text" | "textarea" | "image",
+ *     type?: "text" | "textarea" | "image" | "checkbox",
  *     placeholder?: string,
  *     help?: string,
  *     required?: boolean,
@@ -126,7 +126,21 @@ export default function SettingsFieldGroup({ title, description, fields, values,
               )}
             </div>
 
-            {f.type === "image" ? (
+            {f.type === "checkbox" ? (
+              <label className="flex items-start gap-3 rounded-xl border border-border bg-secondary/30 p-3">
+                <input
+                  id={f.key}
+                  type="checkbox"
+                  checked={String(form[f.key] ?? "") !== "false"}
+                  onChange={(e) => setField(f.key, e.target.checked ? "true" : "false")}
+                  className="mt-1 h-4 w-4"
+                />
+                <span>
+                  <span className="block text-sm font-medium">{f.checkboxLabel || f.label}</span>
+                  {f.help && <span className="mt-0.5 block text-xs text-muted-foreground">{f.help}</span>}
+                </span>
+              </label>
+            ) : f.type === "image" ? (
               <ImageUploader
                 bucket={f.bucket || "site-assets"}
                 folder={f.folder || "cms"}
@@ -158,7 +172,7 @@ export default function SettingsFieldGroup({ title, description, fields, values,
                 maxLength={f.maxLength ? f.maxLength + 20 : undefined}
               />
             )}
-            {f.help && <p className="text-xs text-muted-foreground">{f.help}</p>}
+            {f.help && f.type !== "checkbox" && <p className="text-xs text-muted-foreground">{f.help}</p>}
           </div>
         ))}
       </div>

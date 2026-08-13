@@ -74,7 +74,7 @@ export default function ProductCard({ product, className, variant = "horizontal"
         )}
         {distance != null && (
           <p className="flex items-center gap-1 text-[10px] font-semibold text-primary">
-            <Navigation className="h-3 w-3" /> {distance} কিমি দূরে
+            <Navigation className="h-3 w-3" /> {product.distance_approximate ? `প্রায় ${distance} কিমি দূরে` : `${distance} কিমি দূরে`}
           </p>
         )}
       </div>

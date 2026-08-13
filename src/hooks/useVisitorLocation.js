@@ -163,16 +163,48 @@ export function useVisitorLocation() {
     );
   }, []);
 
-  const selectArea = useCallback((district, upazila = "") => {
-    setLocation({
+  const selectArea = useCallback(async (district, upazila = "") => {
+    // Manual selection can use the selected area's geocoded center as an
+    // approximate reference point. It is NOT the patient's exact GPS location.
+    const base = {
       district, upazila,
-      // Manual area selection is not an exact GPS point, so don't show a fake distance.
       latitude: null, longitude: null,
-      source: "manual", status: "success",
+      source: "manual", status: "loading",
       message: upazila
-        ? `${upazila}, ${district} অনুযায়ী ডাক্তার দেখানো হচ্ছে।`
-        : `${district} জেলার ডাক্তার দেখানো হচ্ছে।`,
-    });
+        ? `${upazila}, ${district} অনুযায়ী এলাকা নির্ধারণ করা হচ্ছে...`
+        : `${district} জেলার ডাক্তার দেখানো হচ্ছে...`,
+    };
+    setLocation(base);
+    try {
+      const query = encodeURIComponent(`${upazila ? upazila + ", " : ""}${district}, Bangladesh`);
+      const response = await fetch(`https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&accept-language=bn&q=${query}`, {
+        headers: { Accept: "application/json" },
+      });
+      if (!response.ok) throw new Error("geocode failed");
+      const rows = await response.json();
+      const row = rows?.[0];
+      const latitude = row ? Number(row.lat) : null;
+      const longitude = row ? Number(row.lon) : null;
+      const next = {
+        ...base,
+        latitude: Number.isFinite(latitude) ? latitude : null,
+        longitude: Number.isFinite(longitude) ? longitude : null,
+        status: "success",
+        message: upazila
+          ? `${upazila}, ${district} অনুযায়ী ডাক্তার দেখানো হচ্ছে। দূরত্বটি নির্বাচিত এলাকার আনুমানিক অবস্থান ধরে দেখানো হবে।`
+          : `${district} জেলার ডাক্তার দেখানো হচ্ছে। দূরত্বটি জেলা-কেন্দ্রিক আনুমানিক অবস্থান ধরে দেখানো হবে।`,
+      };
+      setLocation(next);
+      window.localStorage.setItem("doctor_v1_last_location", JSON.stringify(next));
+    } catch {
+      setLocation({
+        ...base,
+        status: "success",
+        message: upazila
+          ? `${upazila}, ${district} অনুযায়ী ডাক্তার দেখানো হচ্ছে।`
+          : `${district} জেলার ডাক্তার দেখানো হচ্ছে।`,
+      });
+    }
   }, []);
 
   return {

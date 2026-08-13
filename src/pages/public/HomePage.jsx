@@ -38,6 +38,7 @@ export default function HomePage() {
   const { products: popularProducts, loading: popularLoading } = usePopularProducts({ limit: 10 });
   const { banners } = useBanners();
   const { settings } = useSiteSettings();
+  const showLocationDistance = String(settings.show_location_distance ?? "true") !== "false";
   const { location: visitorLocation, requestLocation, selectArea, upazilas } = useVisitorLocation();
 
   useEffect(() => {
@@ -54,10 +55,16 @@ export default function HomePage() {
     district: visitorLocation.district,
     upazila: visitorLocation.upazila,
     limit: 50,
+    visitorLatitude: visitorLocation.latitude,
+    visitorLongitude: visitorLocation.longitude,
+    visitorLocationSource: visitorLocation.source,
   });
   const { products: districtDoctors, loading: districtDoctorsLoading } = useProductsByLocation({
     district: visitorLocation.district,
     limit: 50,
+    visitorLatitude: visitorLocation.latitude,
+    visitorLongitude: visitorLocation.longitude,
+    visitorLocationSource: visitorLocation.source,
   });
 
   const lowerDistrictDoctors = visitorLocation.upazila
@@ -172,6 +179,7 @@ export default function HomePage() {
         products={localDoctors}
         loading={localDoctorsLoading}
         viewAllTo={`${ROUTES.DOCTORS}?district=${encodeURIComponent(visitorLocation.district || "সিরাজগঞ্জ")}${visitorLocation.upazila ? `&upazila=${encodeURIComponent(visitorLocation.upazila)}` : ""}`}
+        showDistance={showLocationDistance && !!visitorLocation.latitude && !!visitorLocation.longitude}
       />
 
       {/* নির্বাচিত উপজেলা থাকলে তার নিচে পুরো জেলার ডাক্তার */}
@@ -187,6 +195,7 @@ export default function HomePage() {
           emptyTitle="এই জেলায় এখনো অন্য কোনো ডাক্তার প্রোফাইল নেই"
           emptyDescription="নতুন ডাক্তার যোগ হলে এখানে দেখা যাবে।"
           viewAllTo={`${ROUTES.DOCTORS}?district=${encodeURIComponent(visitorLocation.district)}&section=latest`}
+          showDistance={showLocationDistance && !!visitorLocation.latitude && !!visitorLocation.longitude}
         />
       )}
 

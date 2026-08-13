@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import { getSearchSynonyms, expandSearchTerms } from "@/lib/searchSynonyms";
 
-const SELECT = "*, shops:shop_id ( shop_name, chamber_name, slug, whatsapp_number, phone, address, district, upazila, google_map_link, facebook_link, messenger_link, visiting_days, visiting_time, consultation_fee, latitude, longitude ), categories:category_id ( name, slug )";
+const SELECT = "*, shops:shop_id ( shop_name, chamber_name, slug, whatsapp_number, phone, address, district, upazila, google_map_link, facebook_link, messenger_link, visiting_days, visiting_time, consultation_fee, latitude, longitude, location_visibility ), categories:category_id ( name, slug )";
 
 export function useDoctorsDirectory({ district = "", upazila = "", section = "popular", query = "", page = 1, pageSize = 20 }) {
   const [products, setProducts] = useState([]);

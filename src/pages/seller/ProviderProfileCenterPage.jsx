@@ -189,7 +189,11 @@ export default function ProviderProfileCenterPage() {
             <div><Label>ধরন</Label><ExampleInput value={shop.chamber_type} onChange={e=>changeShop("chamber_type",e.target.value)} placeholder="উদাহরণ: চেম্বার / হাসপাতাল"/></div>
             <div><Label>ঠিকানা</Label><ExampleInput value={shop.address} onChange={e=>changeShop("address",e.target.value)} placeholder="উদাহরণ: এসএস রোড, সিরাজগঞ্জ সদর"/></div>
             <div><Label>উপজেলা</Label><ExampleInput value={shop.upazila} onChange={e=>changeShop("upazila",e.target.value)} placeholder="উদাহরণ: সিরাজগঞ্জ সদর"/></div>
-            <div><Label>Google Maps লিংক</Label><ExampleInput value={shop.google_map_link} onChange={e=>changeShop("google_map_link",e.target.value)} placeholder="উদাহরণ: Google Maps-এর শেয়ার লিংক"/></div>
+            <div>
+  <Label>Google Maps লিংক</Label>
+  <ExampleInput value={shop.google_map_link} onChange={e=>changeShop("google_map_link",e.target.value)} placeholder="উদাহরণ: Google Maps-এর শেয়ার লিংক"/>
+  <p className="mt-1 text-xs text-muted-foreground">এই লিংক রোগীকে Google Maps-এ দিকনির্দেশনা দেখাবে। কিলোমিটার দূরত্ব দেখাতে চেম্বারের সঠিক latitude/longitude-ও সংরক্ষণ করতে হবে।</p>
+</div>
             <div><Label>ভিজিটিং সময়</Label><ExampleInput value={shop.visiting_time} onChange={e=>changeShop("visiting_time",e.target.value)} placeholder="উদাহরণ: বিকাল ৫টা–রাত ৯টা"/></div>
             <div><Label>ভিজিটিং দিন</Label><ExampleInput value={shop.visiting_days} onChange={e=>changeShop("visiting_days",e.target.value)} placeholder="উদাহরণ: শনি–বৃহস্পতি"/></div>
             <div><Label>ভিজিট ফি</Label><ExampleInput value={shop.consultation_fee} onChange={e=>changeShop("consultation_fee",e.target.value)} placeholder="উদাহরণ: ৫০০ টাকা"/></div>
