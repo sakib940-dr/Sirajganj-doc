@@ -13,6 +13,7 @@ import {
   CalendarDays,
   User,
   Settings,
+
 } from "lucide-react";
 import Sidebar from "@/components/layout/Sidebar.jsx";
 import BottomNav from "@/components/layout/BottomNav.jsx";
@@ -21,12 +22,11 @@ import { useAuth } from "@/hooks/useAuth";
 import { cn } from "@/lib/utils";
 
 const navItems = [
-  { to: ROUTES.DASHBOARD_PERSONAL, label: "ব্যক্তিগত তথ্য", icon: User },
-  { to: ROUTES.DASHBOARD_SHOP, label: "চেম্বার", icon: Store },
+  { to: ROUTES.DASHBOARD_PROFILE_CENTER, label: "প্রোফাইল ও সেটিংস", icon: User },
   { to: ROUTES.DASHBOARD_WEBSITE, label: "ওয়েবসাইট", icon: Globe2 },
   { to: ROUTES.DASHBOARD, label: "ড্যাশবোর্ড", icon: LayoutDashboard, end: true },
   { to: ROUTES.DASHBOARD_APPOINTMENTS, label: "অ্যাপয়েন্টমেন্ট", icon: CalendarDays },
-  { to: ROUTES.DASHBOARD_VERIFICATION, label: "ভেরিফিকেশন", icon: ShieldCheck },
+  
   { to: ROUTES.DASHBOARD_SETTINGS, label: "সেটিংস", icon: Settings },
 ];
 
@@ -52,7 +52,7 @@ export default function DashboardLayout() {
           <div className="flex items-center gap-3">
             <span className="truncate text-sm font-medium">{profile?.full_name || "ডাক্তার প্যানেল"}</span>
             <Link
-              to={ROUTES.DASHBOARD_PERSONAL}
+              to={ROUTES.DASHBOARD_PROFILE_CENTER}
               className="hidden items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground md:flex"
             >
               <KeyRound className="h-4 w-4" />
@@ -124,7 +124,7 @@ export default function DashboardLayout() {
               </NavLink>
             ))}
             <Link
-              to={ROUTES.DASHBOARD_PERSONAL}
+              to={ROUTES.DASHBOARD_PROFILE_CENTER}
               onClick={() => setDrawerOpen(false)}
               className="mt-2 flex items-center gap-2.5 rounded-lg border-t border-border px-3 pt-4 text-sm text-muted-foreground hover:text-foreground"
             >

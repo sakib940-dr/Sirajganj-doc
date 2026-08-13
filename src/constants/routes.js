@@ -24,6 +24,7 @@ export const ROUTES = {
   AMBULANCE: "/ambulance",
 
   DASHBOARD: "/dashboard",
+  DASHBOARD_PROFILE_CENTER: "/dashboard/profile-center",
   DASHBOARD_PERSONAL: "/dashboard/personal-details",
   DASHBOARD_SETTINGS: "/dashboard/settings",
   PATIENT_DASHBOARD: "/patient/dashboard",

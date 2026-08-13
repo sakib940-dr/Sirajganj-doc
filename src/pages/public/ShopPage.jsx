@@ -121,12 +121,12 @@ export default function ShopPage() {
         <div className="mt-6 grid gap-6 md:grid-cols-3">
           <div className="space-y-4 rounded-xl border border-border bg-card p-5 md:col-span-1">
             <h3 className="font-semibold">যোগাযোগ</h3>
-            {shop.phone && (
+            {shop.phone && shop.phone_public !== false && (
               <a href={`tel:${shop.phone}`} className="flex items-center gap-2 text-sm text-foreground hover:text-primary">
                 <Phone className="h-4 w-4 text-primary" /> {shop.phone}
               </a>
             )}
-            {shop.whatsapp_number && (
+            {shop.whatsapp_number && shop.whatsapp_public !== false && (
               <a
                 href={`https://wa.me/${shop.whatsapp_number.replace(/\D/g, "")}`}
                 target="_blank"

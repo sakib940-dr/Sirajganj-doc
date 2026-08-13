@@ -31,8 +31,8 @@ export default function ProductPage() {
   if(error||!product)return <div className="container py-16"><EmptyState icon={UserRound} title="ডাক্তারের প্রোফাইল পাওয়া যায়নি"/></div>;
 
   const chamber=product.shops;
-  const phone=chamber?.phone;
-  const whatsapp=chamber?.whatsapp_number;
+  const phone=chamber?.phone_public !== false ? chamber?.phone : null;
+  const whatsapp=chamber?.whatsapp_public !== false ? chamber?.whatsapp_number : null;
   const whatsappText=encodeURIComponent(`আমি Dr. ${product.name}-এর appointment/consultation সম্পর্কে জানতে চাই। ${window.location.href}`);
 
   return <div className="container py-8 md:py-10">

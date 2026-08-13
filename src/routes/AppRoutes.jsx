@@ -40,6 +40,7 @@ import NotFoundPage from "@/pages/public/NotFoundPage.jsx";
 // Seller
 import DashboardHome from "@/pages/seller/DashboardHome.jsx";
 import ShopSettingsPage from "@/pages/seller/ShopSettingsPage.jsx";
+import ProviderProfileCenterPage from "@/pages/seller/ProviderProfileCenterPage.jsx";
 import WebsiteBuilderPage from "@/pages/seller/WebsiteBuilderPage.jsx";
 import ProductListPage from "@/pages/seller/ProductListPage.jsx";
 import ProductEditPage from "@/pages/seller/ProductEditPage.jsx";
@@ -149,15 +150,16 @@ export default function AppRoutes() {
         }
       >
         <Route path={ROUTES.DASHBOARD} element={<DashboardHome />} />
-        <Route path={ROUTES.DASHBOARD_PERSONAL} element={<PersonalDetailsPage />} />
+        <Route path={ROUTES.DASHBOARD_PERSONAL} element={<Navigate to={ROUTES.DASHBOARD_PROFILE_CENTER} replace />} />
+        <Route path={ROUTES.DASHBOARD_PROFILE_CENTER} element={<ProviderProfileCenterPage />} />
         <Route path={ROUTES.DASHBOARD_SETTINGS} element={<SettingsPage />} />
-        <Route path={ROUTES.DASHBOARD_SHOP} element={<ShopSettingsPage />} />
+        <Route path={ROUTES.DASHBOARD_SHOP} element={<Navigate to={ROUTES.DASHBOARD_PROFILE_CENTER} replace />} />
         <Route path={ROUTES.DASHBOARD_WEBSITE} element={<WebsiteBuilderPage />} />
         <Route path={ROUTES.DASHBOARD_PRODUCTS} element={<ProductListPage />} />
         <Route path={ROUTES.DASHBOARD_PRODUCT_NEW} element={<ProductEditPage />} />
         <Route path={ROUTES.DASHBOARD_PRODUCT_EDIT} element={<ProductEditPage />} />
         <Route path={ROUTES.DASHBOARD_GALLERY} element={<GalleryPage />} />
-        <Route path={ROUTES.DASHBOARD_VERIFICATION} element={<SellerVerificationPage />} />
+        <Route path={ROUTES.DASHBOARD_VERIFICATION} element={<Navigate to={ROUTES.DASHBOARD_PROFILE_CENTER} replace />} />
         <Route path={ROUTES.DASHBOARD_ANALYTICS} element={<AnalyticsPage />} />
         <Route path={ROUTES.DASHBOARD_APPOINTMENTS} element={<DoctorAppointmentsPage />} />
       </Route>
