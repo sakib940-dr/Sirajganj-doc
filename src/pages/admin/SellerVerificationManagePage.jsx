@@ -4,7 +4,7 @@ import { supabase } from "@/lib/supabaseClient";
 import { Button } from "@/components/ui/button";
 import EmptyState from "@/components/shared/EmptyState.jsx";
 import LoadingSpinner from "@/components/shared/LoadingSpinner.jsx";
-import ImageLightbox from "@/components/shared/ImageLightbox.jsx";
+import PrivateStorageImageLightbox from "@/components/shared/PrivateStorageImageLightbox.jsx";
 import { formatDateBn } from "@/lib/utils";
 import { VERIFICATION_STATUS, VERIFICATION_STATUS_LABEL_BN } from "@/constants/roles";
 
@@ -18,7 +18,7 @@ export default function SellerVerificationManagePage() {
     setLoading(true);
     const { data } = await supabase
       .from("seller_verifications")
-      .select("*, profiles:user_id ( full_name, email, phone )")
+      .select("*, profiles:user_id ( full_name, email, phone, role )")
       .order("created_at", { ascending: false });
     setItems(data ?? []);
     setLoading(false);
@@ -29,11 +29,16 @@ export default function SellerVerificationManagePage() {
   }, [load]);
 
   const updateStatus = async (id, status) => {
-    setBusyId(id);
-    const { error } = await supabase.from("seller_verifications").update({ status }).eq("id", id);
-    if (!error) {
-      setItems((prev) => prev.map((it) => (it.id === id ? { ...it, status } : it)));
+    let note = null;
+    if (status === VERIFICATION_STATUS.REJECTED) {
+      note = window.prompt("প্রত্যাখ্যানের কারণ লিখুন:", "");
+      if (note === null) return;
+      if (!note.trim()) { window.alert("প্রত্যাখ্যানের কারণ লিখতে হবে।"); return; }
     }
+    setBusyId(id);
+    const { error } = await supabase.rpc("review_provider_verification", { p_verification_id: id, p_status: status, p_admin_note: note });
+    if (!error) setItems((prev) => prev.map((it) => (it.id === id ? { ...it, status, admin_note: note } : it)));
+    else window.alert(error.message || "ভেরিফিকেশন আপডেট করা যায়নি।");
     setBusyId(null);
   };
 
@@ -52,13 +57,13 @@ export default function SellerVerificationManagePage() {
   if (loading) return <LoadingSpinner label="ভেরিফিকেশন তালিকা লোড হচ্ছে..." />;
 
   if (items.length === 0) {
-    return <EmptyState icon={ShieldCheck} title="এখনো কোনো ডাক্তার ভেরিফিকেশন আবেদন নেই" />;
+    return <EmptyState icon={ShieldCheck} title="এখনো কোনো প্রোভাইডার ভেরিফিকেশন আবেদন নেই" />;
   }
 
   return (
     <div className="space-y-4">
       <h1 className="text-xl font-bold" style={{ fontFamily: "'Tiro Bangla', serif" }}>
-        ডাক্তার ভেরিফিকেশন
+        ডাক্তার ও হাসপাতাল ভেরিফিকেশন
       </h1>
 
       <div className="space-y-4">
@@ -101,8 +106,8 @@ function VerificationCard({ v, busy, onUpdate, readOnlyActions = false, isHistor
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="flex items-center gap-3">
           {v.profile_photo_url ? (
-            <ImageLightbox
-              src={v.profile_photo_url}
+            <PrivateStorageImageLightbox
+              value={v.profile_photo_url}
               alt={v.full_name || v.profiles?.full_name || "প্রোফাইল ছবি"}
               shape="square"
               thumbClassName="h-16 w-16 rounded-full"
@@ -137,48 +142,26 @@ function VerificationCard({ v, busy, onUpdate, readOnlyActions = false, isHistor
 
       <div className="mt-4 grid gap-4 sm:grid-cols-2">
         <div className="space-y-1.5 text-sm">
-          <p>
-            <span className="text-muted-foreground">ব্যবসার ধরন: </span>
-            {v.business_type || "—"}
-          </p>
-          <p>
-            <span className="text-muted-foreground">ডাক্তার প্রোফাইলের ধরন: </span>
-            {v.product_type || "—"}
-          </p>
-          <p>
-            <span className="text-muted-foreground">মাসিক গড় বিক্রয়: </span>
-            {v.avg_monthly_sales_bdt != null ? `৳${v.avg_monthly_sales_bdt}` : "—"}
-          </p>
-          <p>
-            <span className="text-muted-foreground">মাসিক বিক্রয় লক্ষ্য: </span>
-            {v.monthly_sales_target_bdt != null ? `৳${v.monthly_sales_target_bdt}` : "—"}
-          </p>
-          <p>
-            <span className="text-muted-foreground">বিক্রয়ের মাধ্যম: </span>
-            {v.sales_channel || "—"}
-          </p>
-          <p>
-            <span className="text-muted-foreground">Facebook Page-এ অ্যাপয়েন্টমেন্ট: </span>
-            {v.sells_via_facebook_page === true ? "হ্যাঁ" : v.sells_via_facebook_page === false ? "না" : "—"}
-          </p>
-          <p>
-            <span className="text-muted-foreground">অন্য e-commerce platform: </span>
-            {v.uses_other_ecommerce_platform === true
-              ? v.other_ecommerce_platform_name
-                ? `হ্যাঁ (${v.other_ecommerce_platform_name})`
-                : "হ্যাঁ"
-              : v.uses_other_ecommerce_platform === false
-              ? "না"
-              : "—"}
-          </p>
-          <p>
-            <span className="text-muted-foreground">ঠিকানা: </span>
-            {v.address || "—"}
-          </p>
-          <p>
-            <span className="text-muted-foreground">NID নম্বর: </span>
-            {v.nid_number || "—"}
-          </p>
+          <p><span className="text-muted-foreground">অ্যাকাউন্ট ধরন: </span>{v.profiles?.role === "hospital" ? "হাসপাতাল / চেম্বার" : "ডাক্তার"}</p>
+          {v.profiles?.role === "doctor" && <>
+            <p><span className="text-muted-foreground">ডিগ্রি: </span>{v.degree || "—"}</p>
+            <p><span className="text-muted-foreground">বিশেষত্ব: </span>{v.specialty || "—"}</p>
+            <p><span className="text-muted-foreground">পদবি: </span>{v.designation || "—"}</p>
+            <p><span className="text-muted-foreground">BMDC নম্বর: </span>{v.bmdc_registration_no || "—"}</p>
+            <p><span className="text-muted-foreground">চেম্বার: </span>{v.chamber_name || "—"}</p>
+            <p><span className="text-muted-foreground">চেম্বারের ঠিকানা: </span>{v.chamber_address || "—"}</p>
+            <p><span className="text-muted-foreground">রোগী দেখার দিন: </span>{v.visiting_days || "—"}</p>
+            <p><span className="text-muted-foreground">রোগী দেখার সময়: </span>{v.visiting_time || "—"}</p>
+            <p><span className="text-muted-foreground">পরামর্শ ফি: </span>{v.consultation_fee != null ? `৳${v.consultation_fee}` : "—"}</p>
+          </>}
+          {v.profiles?.role === "hospital" && <>
+            <p><span className="text-muted-foreground">প্রতিষ্ঠান / চেম্বার: </span>{v.chamber_name || v.full_name || "—"}</p>
+            <p><span className="text-muted-foreground">ট্রেড লাইসেন্স: </span>{v.trade_license_no || "—"}</p>
+            <p><span className="text-muted-foreground">প্রতিষ্ঠানের ঠিকানা: </span>{v.chamber_address || v.address || "—"}</p>
+          </>}
+          <p><span className="text-muted-foreground">যোগাযোগের ঠিকানা: </span>{v.address || "—"}</p>
+          <p><span className="text-muted-foreground">NID নম্বর: </span>{v.nid_number || "—"}</p>
+          {v.admin_note && <p className="rounded-lg bg-secondary/60 p-2"><span className="text-muted-foreground">অ্যাডমিন নোট: </span>{v.admin_note}</p>}
           <div className="flex flex-wrap gap-3 pt-1">
             {v.google_map_link && (
               <a
@@ -207,35 +190,47 @@ function VerificationCard({ v, busy, onUpdate, readOnlyActions = false, isHistor
           {v.nid_front_url && (
             <div>
               <p className="mb-1 text-[11px] text-muted-foreground">NID সামনে</p>
-              <ImageLightbox src={v.nid_front_url} alt="NID সামনের পাশ" shape="wide" thumbClassName="h-24 w-40" />
+              <PrivateStorageImageLightbox value={v.nid_front_url} alt="NID সামনের পাশ" shape="wide" thumbClassName="h-24 w-40" />
             </div>
           )}
           {v.nid_back_url && (
             <div>
               <p className="mb-1 text-[11px] text-muted-foreground">NID পেছনে</p>
-              <ImageLightbox src={v.nid_back_url} alt="NID পেছনের পাশ" shape="wide" thumbClassName="h-24 w-40" />
+              <PrivateStorageImageLightbox value={v.nid_back_url} alt="NID পেছনের পাশ" shape="wide" thumbClassName="h-24 w-40" />
+            </div>
+          )}
+          {v.bmdc_document_url && (
+            <div>
+              <p className="mb-1 text-[11px] text-muted-foreground">BMDC প্রমাণপত্র</p>
+              <PrivateStorageImageLightbox value={v.bmdc_document_url} alt="BMDC প্রমাণপত্র" shape="wide" thumbClassName="h-24 w-40" />
+            </div>
+          )}
+          {v.trade_license_url && (
+            <div>
+              <p className="mb-1 text-[11px] text-muted-foreground">ট্রেড লাইসেন্স</p>
+              <PrivateStorageImageLightbox value={v.trade_license_url} alt="ট্রেড লাইসেন্স" shape="wide" thumbClassName="h-24 w-40" />
             </div>
           )}
         </div>
       </div>
 
       {!readOnlyActions && (
-        <div className="mt-4 flex gap-2">
-          <Button
+        <div className="mt-4 flex flex-wrap gap-2">
+          {v.status === VERIFICATION_STATUS.PENDING && <Button
             size="sm"
-            disabled={busy || v.status === VERIFICATION_STATUS.APPROVED}
-            onClick={() => onUpdate(v.id, VERIFICATION_STATUS.APPROVED)}
+            disabled={busy}
+            onClick={() => onUpdate(v.id, VERIFICATION_STATUS.UNDER_REVIEW)}
           >
-            <Check className="h-4 w-4" /> অনুমোদন
-          </Button>
-          <Button
-            size="sm"
-            variant="outline"
-            disabled={busy || v.status === VERIFICATION_STATUS.REJECTED}
-            onClick={() => onUpdate(v.id, VERIFICATION_STATUS.REJECTED)}
-          >
-            <X className="h-4 w-4" /> প্রত্যাখ্যান
-          </Button>
+            <ShieldCheck className="h-4 w-4" /> পর্যালোচনা শুরু
+          </Button>}
+          {v.status === VERIFICATION_STATUS.UNDER_REVIEW && <>
+            <Button size="sm" disabled={busy} onClick={() => onUpdate(v.id, VERIFICATION_STATUS.APPROVED)}>
+              <Check className="h-4 w-4" /> অনুমোদন
+            </Button>
+            <Button size="sm" variant="outline" disabled={busy} onClick={() => onUpdate(v.id, VERIFICATION_STATUS.REJECTED)}>
+              <X className="h-4 w-4" /> প্রত্যাখ্যান
+            </Button>
+          </>}
         </div>
       )}
       {isHistory && (

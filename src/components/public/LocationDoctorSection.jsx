@@ -12,11 +12,14 @@ export default function LocationDoctorSection({
   viewAllTo,
   showDistance = false,
 }) {
+  const hasCoordinates = Number.isFinite(Number(location.latitude)) && Number.isFinite(Number(location.longitude));
   const title = location.upazila
     ? `${location.upazila} এলাকার ডাক্তার`
     : location.district
       ? `${location.district} জেলার ডাক্তার`
-      : "আপনার এলাকার ডাক্তার";
+      : hasCoordinates
+        ? "আপনার কাছের ডাক্তার"
+        : "আপনার এলাকার ডাক্তার";
 
   return (
     <>
@@ -85,10 +88,10 @@ export default function LocationDoctorSection({
         </div>
       </section>
 
-      {(location.district || location.upazila) && (
+      {(location.district || location.upazila || hasCoordinates) && (
         <ProductRow
           title={title}
-          subtitle={location.upazila ? `${location.upazila} উপজেলায় প্রকাশিত ডাক্তার প্রোফাইল` : "আপনার নির্বাচিত জেলার ডাক্তার প্রোফাইল"}
+          subtitle={location.upazila ? `${location.upazila} উপজেলায় প্রকাশিত ডাক্তার প্রোফাইল` : location.district ? "আপনার নির্বাচিত জেলার ডাক্তার প্রোফাইল" : "GPS অবস্থান অনুযায়ী কাছের ডাক্তার"}
           icon={MapPin}
           accentClassName="bg-primary/10 text-primary"
           products={products}

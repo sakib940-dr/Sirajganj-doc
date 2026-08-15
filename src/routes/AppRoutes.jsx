@@ -48,6 +48,8 @@ import GalleryPage from "@/pages/seller/GalleryPage.jsx";
 import SellerVerificationPage from "@/pages/seller/SellerVerificationPage.jsx";
 import AnalyticsPage from "@/pages/seller/AnalyticsPage.jsx";
 import DoctorAppointmentsPage from "@/pages/seller/AppointmentsPage.jsx";
+import AffiliationsPage from "@/pages/seller/AffiliationsPage.jsx";
+import SchedulePage from "@/pages/seller/SchedulePage.jsx";
 
 // Admin
 import AdminDashboard from "@/pages/admin/AdminDashboard.jsx";
@@ -60,6 +62,7 @@ import ProductManagePage from "@/pages/admin/ProductManagePage.jsx";
 import BannerManagePage from "@/pages/admin/BannerManagePage.jsx";
 import CMSPage from "@/pages/admin/cms/CMSPage.jsx";
 import AmbulanceManagePage from "@/pages/admin/AmbulanceManagePage.jsx";
+import BloodDonorManagePage from "@/pages/admin/BloodDonorManagePage.jsx";
 
 function RoleAwareHome() {
   const { role } = useAuth();
@@ -162,6 +165,8 @@ export default function AppRoutes() {
         <Route path={ROUTES.DASHBOARD_VERIFICATION} element={<Navigate to={ROUTES.DASHBOARD_PROFILE_CENTER} replace />} />
         <Route path={ROUTES.DASHBOARD_ANALYTICS} element={<AnalyticsPage />} />
         <Route path={ROUTES.DASHBOARD_APPOINTMENTS} element={<DoctorAppointmentsPage />} />
+        <Route path={ROUTES.DASHBOARD_SCHEDULE} element={<SchedulePage />} />
+        <Route path={ROUTES.DASHBOARD_AFFILIATIONS} element={<AffiliationsPage />} />
       </Route>
 
       {/* Admin Panel (protected, role: admin অথবা super_admin) */}
@@ -204,6 +209,7 @@ export default function AppRoutes() {
           }
         />
         <Route path={ROUTES.ADMIN_AMBULANCE} element={<AmbulanceManagePage />} />
+        <Route path={ROUTES.ADMIN_BLOOD_DONORS} element={<BloodDonorManagePage />} />
         <Route
           path={ROUTES.ADMIN_CMS}
           element={

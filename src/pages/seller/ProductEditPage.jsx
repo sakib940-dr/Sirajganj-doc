@@ -14,6 +14,7 @@ import LoadingSpinner from "@/components/shared/LoadingSpinner.jsx";
 import PendingApprovalNotice from "@/components/seller/PendingApprovalNotice.jsx";
 import { ROUTES } from "@/constants/routes";
 import { ROLES, SELLER_STATUS, isAdminOrAbove } from "@/constants/roles";
+import { listApprovedDoctorsForProvider } from "@/services/providerService";
 
 const EMPTY = {
   doctor_id:"", name:"", slug:"", category_id:"", price:"", description:"", thumbnail_url:"",
@@ -49,7 +50,7 @@ export default function ProductEditPage({ embedded = false }) {
       const {data:shop}=await supabase.from("shops").select("id").eq("owner_id",user.id).maybeSingle();
       setShopId(shop?.id??null);
       if(role === ROLES.HOSPITAL || role === ROLES.ADMIN || role === ROLES.SUPER_ADMIN){
-        const {data:docs}=await supabase.from("profiles").select("id,full_name").eq("role","doctor").eq("seller_status","approved").eq("account_status","active").order("full_name");
+        const {data:docs}=await listApprovedDoctorsForProvider();
         setApprovedDoctors(docs??[]);
       }
       if(editing){
@@ -94,7 +95,7 @@ export default function ProductEditPage({ embedded = false }) {
     if(result.error){
       const msg=result.error.message||"";
       if(msg.includes("duplicate") || msg.includes("ux_one_doctor_প্রোফাইল_per_owner"))
-        setError("এই ডাক্তার অ্যাকাউন্ট-এর একটি প্রোফাইল ইতিমধ্যে আছে।");
+        setError("এই ডাক্তারকে এই চেম্বার/হাসপাতালে ইতিমধ্যে যুক্ত করা আছে।");
       else if(msg.toLowerCase().includes("row-level security"))
         setError("অনুমতি নেই — ডাক্তার verification অনুমোদিত হওয়ার পর প্রোফাইল publish করা যাবে।");
       else setError("সংরক্ষণ ব্যর্থ হয়েছে: "+msg);
@@ -121,7 +122,7 @@ export default function ProductEditPage({ embedded = false }) {
   const content = <div className="space-y-5">
     {!embedded && <div>
       <h1 className="text-xl font-bold" style={{fontFamily:"'Tiro Bangla', serif"}}>{editing?"ডাক্তার প্রোফাইল সম্পাদনা":"ডাক্তার প্রোফাইল প্রকাশ"}</h1>
-      <p className="text-sm text-muted-foreground">প্রতি ডাক্তার অ্যাকাউন্টে সর্বোচ্চ ১টি পাবলিক প্রোফাইল থাকবে।</p>
+      <p className="text-sm text-muted-foreground">একজন ডাক্তার একাধিক চেম্বার/হাসপাতালে যুক্ত হতে পারবেন; একই প্রতিষ্ঠানে একই ডাক্তার একবারই থাকবে।</p>
     </div>}
 
     <form onSubmit={submit} className="space-y-5">
@@ -133,7 +134,7 @@ export default function ProductEditPage({ embedded = false }) {
       </Card>
 
       <Card><CardHeader><CardTitle className="text-base">ডাক্তারের তথ্য</CardTitle></CardHeader><CardContent className="space-y-4">
-        {role !== ROLES.DOCTOR && <div><Label>ডাক্তার নির্বাচন করুন *</Label><select required value={product.doctor_id||""} onChange={e=>{const d=approvedDoctors.find(x=>x.id===e.target.value); update("doctor_id",e.target.value); if(d && !editing) nameChange(d.full_name||"");}} className="flex h-10 w-full rounded-lg border border-input bg-card px-3 text-sm"><option value="">অনুমোদিত ডাক্তার নির্বাচন করুন</option>{approvedDoctors.map(d=><option key={d.id} value={d.id}>{d.full_name}</option>)}</select><p className="mt-1 text-xs text-muted-foreground">চেম্বার/হাসপাতাল অ্যাকাউন্ট এখান থেকে অনুমোদিত ডাক্তারকে নিজের চেম্বারে যুক্ত করতে পারবে।</p></div>}
+        {role !== ROLES.DOCTOR && <div><Label>ডাক্তার নির্বাচন করুন *</Label><select required value={product.doctor_id||""} onChange={e=>{const d=approvedDoctors.find(x=>x.id===e.target.value); update("doctor_id",e.target.value); if(d && !editing) nameChange(d.full_name||"");}} className="flex h-10 w-full rounded-lg border border-input bg-card px-3 text-sm"><option value="">অনুমোদিত ডাক্তার নির্বাচন করুন</option>{approvedDoctors.map(d=><option key={d.id} value={d.id}>{d.full_name}</option>)}</select><p className="mt-1 text-xs text-muted-foreground">শুধু যেসব ডাক্তার আপনার আমন্ত্রণ গ্রহণ করেছেন, তারাই এখানে দেখাবে। <Link to={ROUTES.DASHBOARD_AFFILIATIONS} className="font-semibold text-primary hover:underline">ডাক্তার সংযোগ</Link> পেজ থেকে নতুন আমন্ত্রণ পাঠান।</p></div>}
         <div><Label>ডাক্তারের নাম *</Label><Input required value={product.name} onChange={e=>nameChange(e.target.value)} /></div>
         <div><Label>প্রোফাইল লিংক *</Label><Input required value={product.slug} onChange={e=>{setSlugEdited(true);update("slug",e.target.value)}}/></div>
         <div className="grid gap-4 sm:grid-cols-2">

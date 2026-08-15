@@ -125,11 +125,15 @@ export default function ProviderProfileCenterPage() {
         const {data:existing,error:findErr} = await supabase.from("seller_verifications").select("id,status").eq("user_id",user.id).order("created_at",{ascending:false}).limit(1).maybeSingle();
         if (findErr) throw findErr;
         const payload = {user_id:user.id,...proof};
-        if (existing?.id) {
-          if (existing.status === "approved") throw new Error("অনুমোদিত ভেরিফিকেশন পরিবর্তন করা যাবে না।");
+        if (existing?.id && existing.status === "pending") {
           const {error} = await supabase.from("seller_verifications").update(payload).eq("id",existing.id);
           if (error) throw error;
+        } else if (existing?.id && existing.status === "approved") {
+          throw new Error("অনুমোদিত ভেরিফিকেশন পরিবর্তন করা যাবে না।");
+        } else if (existing?.id && existing.status === "under_review") {
+          throw new Error("ভেরিফিকেশন এখন অ্যাডমিন পর্যালোচনায় আছে; সিদ্ধান্ত না হওয়া পর্যন্ত পরিবর্তন করা যাবে না।");
         } else {
+          // Rejected applications are preserved as history; resubmission creates a new pending row.
           const {error} = await supabase.from("seller_verifications").insert(payload);
           if (error) throw error;
         }
@@ -230,18 +234,18 @@ export default function ProviderProfileCenterPage() {
               </div></div>
               {proof.verification_type==="bmdc" && <div><Label>BMDC নম্বর</Label><ExampleInput value={proof.bmdc_registration_no} onChange={e=>changeProof("bmdc_registration_no",e.target.value)} placeholder="উদাহরণ: BMDC-12345"/></div>}
               {proof.verification_type==="trade_license" && <div><Label>ট্রেড লাইসেন্স নম্বর</Label><ExampleInput value={proof.trade_license_no} onChange={e=>changeProof("trade_license_no",e.target.value)} placeholder="উদাহরণ: TL-123456"/></div>}
-              {proof.verification_type==="nid" && <ImageUploader bucket="verification-docs" folder={user.id} value={proof.nid_front_url||""} onUploaded={url=>changeProof("nid_front_url",url)} aspect="landscape" maxSizeKB={1024} autoCompress compressTargetMinKB={100} compressTargetMaxKB={200}/>}
+              {proof.verification_type==="nid" && <ImageUploader bucket="verification-docs" privateBucket folder={user.id} value={proof.nid_front_url||""} onUploaded={url=>changeProof("nid_front_url",url)} aspect="landscape" maxSizeKB={1024} autoCompress compressTargetMinKB={100} compressTargetMaxKB={200}/>}
               <p className="rounded-xl bg-secondary/40 p-3 text-xs text-muted-foreground">হাসপাতাল/চেম্বারের পরিচয় ও বৈধতা যাচাই করে রোগীদের কাছে নির্ভরযোগ্য তথ্য প্রকাশ করার জন্য এই প্রমাণ নেওয়া হয়।</p>
             </>
           ) : (
             <>
               <div><Label>BMDC রেজিস্ট্রেশন নম্বর</Label><ExampleInput value={proof.bmdc_registration_no} onChange={e=>changeProof("bmdc_registration_no",e.target.value)} placeholder="উদাহরণ: A-12345"/></div>
-              <div><Label>BMDC নথি (যদি অনলাইন যাচাই সম্ভব না হয়)</Label><ImageUploader bucket="verification-docs" folder={user.id} value={proof.bmdc_document_url||""} onUploaded={url=>changeProof("bmdc_document_url",url)} aspect="landscape" maxSizeKB={1024} autoCompress compressTargetMinKB={100} compressTargetMaxKB={200}/></div>
-              <div><Label>NID-এর সামনের অংশ (শুধু BMDC থেকে অনলাইনে যাচাই সম্ভব না হলে)</Label><ImageUploader bucket="verification-docs" folder={user.id} value={proof.nid_front_url||""} onUploaded={url=>changeProof("nid_front_url",url)} aspect="landscape" maxSizeKB={1024} autoCompress compressTargetMinKB={100} compressTargetMaxKB={200}/></div>
+              <div><Label>BMDC নথি (যদি অনলাইন যাচাই সম্ভব না হয়)</Label><ImageUploader bucket="verification-docs" privateBucket folder={user.id} value={proof.bmdc_document_url||""} onUploaded={url=>changeProof("bmdc_document_url",url)} aspect="landscape" maxSizeKB={1024} autoCompress compressTargetMinKB={100} compressTargetMaxKB={200}/></div>
+              <div><Label>NID-এর সামনের অংশ (শুধু BMDC থেকে অনলাইনে যাচাই সম্ভব না হলে)</Label><ImageUploader bucket="verification-docs" privateBucket folder={user.id} value={proof.nid_front_url||""} onUploaded={url=>changeProof("nid_front_url",url)} aspect="landscape" maxSizeKB={1024} autoCompress compressTargetMinKB={100} compressTargetMaxKB={200}/></div>
               <p className="rounded-xl bg-secondary/40 p-3 text-xs text-muted-foreground">BMDC নম্বর দিয়ে অনলাইনে তথ্য যাচাই করা সম্ভব হলে NID লাগবে না। যাচাই সম্ভব না হলে পরিচয় নিশ্চিত করার অতিরিক্ত প্রমাণ হিসেবে শুধু NID-এর সামনের অংশ চাওয়া হতে পারে।</p>
             </>
           )}
-          {status && <p className="text-xs text-muted-foreground">বর্তমান অবস্থা: <b>{status==="approved"?"অনুমোদিত":status==="pending"?"পর্যালোচনাধীন":"পুনরায় জমা দিতে হবে"}</b></p>}
+          {status && <p className="text-xs text-muted-foreground">বর্তমান অবস্থা: <b>{status==="approved"?"অনুমোদিত":status==="under_review"?"পর্যালোচনাধীন":status==="pending"?"অপেক্ষমাণ":"প্রত্যাখ্যাত — পুনরায় জমা দিন"}</b></p>}
           <div className="flex items-center justify-between gap-3"><SaveState saved={saved==="proof"} error={errors.proof}/><Button onClick={()=>save("proof")} disabled={saving==="proof"}>{saving==="proof"?"সংরক্ষণ হচ্ছে...":"ভেরিফিকেশন অংশ সংরক্ষণ করুন"}</Button></div>
         </CardContent>
       </Card>

@@ -1,4 +1,5 @@
 import { useEffect, useState, useCallback } from "react";
+import { Link } from "react-router-dom";
 import {
   Check,
   X,
@@ -19,10 +20,13 @@ import LoadingSpinner from "@/components/shared/LoadingSpinner.jsx";
 import EmptyState from "@/components/shared/EmptyState.jsx";
 import { formatDateBn } from "@/lib/utils";
 import { useAuth } from "@/hooks/useAuth";
+import PrivateStorageImageLightbox from "@/components/shared/PrivateStorageImageLightbox.jsx";
+import { ROUTES } from "@/constants/routes";
 import {
   ROLES,
   SELLER_STATUS,
   SELLER_STATUS_LABEL_BN,
+  ROLE_LABEL_BN,
   ACCOUNT_STATUS,
   ACCOUNT_STATUS_LABEL_BN,
   VERIFICATION_STATUS_LABEL_BN,
@@ -53,7 +57,7 @@ export default function SellerManagePage() {
     const { data } = await supabase
       .from("profiles")
       .select("*")
-      .eq("role", "doctor")
+      .in("role", ["doctor", "hospital"])
       .order("created_at", { ascending: false });
     setProfiles(data ?? []);
     setLoading(false);
@@ -63,15 +67,6 @@ export default function SellerManagePage() {
     load();
   }, [load]);
 
-  const updateStatus = async (id, status) => {
-    setBusyId(id);
-    const { error } = await supabase.from("profiles").update({ seller_status: status }).eq("id", id);
-    if (!error) {
-      setProfiles((prev) => prev.map((p) => (p.id === id ? { ...p, seller_status: status } : p)));
-      setSelected((prev) => (prev && prev.id === id ? { ...prev, seller_status: status } : prev));
-    }
-    setBusyId(null);
-  };
 
   const patchLocal = (id, patch) => {
     setProfiles((prev) => prev.map((p) => (p.id === id ? { ...p, ...patch } : p)));
@@ -132,8 +127,8 @@ export default function SellerManagePage() {
     if (
       !window.confirm(
         nextAction === "ban"
-          ? `"${selected.full_name || "এই ডাক্তার"}"-কে নিষ্ক্রিয় (deactivate) করতে চান? তিনি আর লগইন করতে পারবেন না।`
-          : `"${selected.full_name || "এই ডাক্তার"}"-কে সক্রিয় (activate) করতে চান?`
+          ? `"${selected.full_name || "এই প্রোভাইডার"}"-কে নিষ্ক্রিয় (deactivate) করতে চান? অ্যাকাউন্টটি আর লগইন করতে পারবে না।`
+          : `"${selected.full_name || "এই প্রোভাইডার"}"-কে সক্রিয় (activate) করতে চান?`
       )
     )
       return;
@@ -153,19 +148,19 @@ export default function SellerManagePage() {
     });
   };
 
-  if (loading) return <LoadingSpinner label="ডাক্তার তালিকা লোড হচ্ছে..." />;
+  if (loading) return <LoadingSpinner label="ডাক্তার ও হাসপাতাল তালিকা লোড হচ্ছে..." />;
 
   if (profiles.length === 0) {
-    return <EmptyState icon={Users} title="এখনো কোনো ডাক্তার আবেদন নেই" />;
+    return <EmptyState icon={Users} title="এখনো কোনো ডাক্তার/হাসপাতাল আবেদন নেই" />;
   }
 
   return (
     <div className="space-y-4">
       <div>
         <h1 className="text-xl font-bold" style={{ fontFamily: "'Tiro Bangla', serif" }}>
-          ডাক্তার ম্যানেজমেন্ট
+          ডাক্তার ও হাসপাতাল ম্যানেজমেন্ট
         </h1>
-        <p className="text-sm text-muted-foreground">একজন ডাক্তারে ক্লিক করলে বিস্তারিত প্রোফাইল তথ্য দেখা যাবে</p>
+        <p className="text-sm text-muted-foreground">ডাক্তার বা হাসপাতালে ক্লিক করলে বিস্তারিত প্রোভাইডার তথ্য দেখা যাবে</p>
       </div>
 
       <div className="overflow-x-auto rounded-xl border border-border bg-card">
@@ -211,23 +206,8 @@ export default function SellerManagePage() {
                   </span>
                 </td>
                 <td className="p-3">
-                  <div className="flex gap-2" onClick={(e) => e.stopPropagation()}>
-                    <Button
-                      size="sm"
-                      variant="default"
-                      disabled={busyId === p.id || p.seller_status === SELLER_STATUS.APPROVED}
-                      onClick={() => updateStatus(p.id, SELLER_STATUS.APPROVED)}
-                    >
-                      <Check className="h-4 w-4" /> অনুমোদন
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      disabled={busyId === p.id || p.seller_status === SELLER_STATUS.REJECTED}
-                      onClick={() => updateStatus(p.id, SELLER_STATUS.REJECTED)}
-                    >
-                      <X className="h-4 w-4" /> প্রত্যাখ্যান
-                    </Button>
+                  <div onClick={(e) => e.stopPropagation()}>
+                    <Link to={ROUTES.ADMIN_VERIFICATIONS} className="inline-flex min-h-9 items-center rounded-lg border px-3 text-xs font-semibold text-primary">ভেরিফিকেশন দেখুন</Link>
                   </div>
                 </td>
               </tr>
@@ -245,10 +225,11 @@ export default function SellerManagePage() {
             <div className="mb-4 flex items-start justify-between gap-3">
               <div className="flex items-center gap-3">
                 {detail?.verification?.profile_photo_url ? (
-                  <img
-                    src={detail.verification.profile_photo_url}
-                    alt={selected.full_name || ""}
-                    className="h-14 w-14 rounded-full object-cover"
+                  <PrivateStorageImageLightbox
+                    value={detail.verification.profile_photo_url}
+                    alt={selected.full_name || "ভেরিফিকেশন প্রোফাইল ছবি"}
+                    shape="square"
+                    thumbClassName="h-14 w-14 rounded-full"
                   />
                 ) : (
                   <UserCircle2 className="h-14 w-14 text-muted-foreground" />
@@ -256,7 +237,7 @@ export default function SellerManagePage() {
                 <div>
                   <h2 className="text-lg font-bold">{selected.full_name || "নাম নেই"}</h2>
                   <span className="inline-block rounded-full bg-secondary px-2.5 py-0.5 text-xs font-medium text-foreground/80">
-                    ডাক্তার
+                    {ROLE_LABEL_BN[selected.role] || "প্রোভাইডার"}
                   </span>
                 </div>
               </div>
@@ -285,7 +266,7 @@ export default function SellerManagePage() {
                 />
                 <DetailRow
                   icon={BadgeCheck}
-                  label="ডাক্তার ভেরিফিকেশন"
+                  label="প্রোভাইডার ভেরিফিকেশন"
                   value={
                     detail?.verification
                       ? VERIFICATION_STATUS_LABEL_BN[detail.verification.status]
@@ -327,13 +308,9 @@ export default function SellerManagePage() {
                 {actionError && <p className="text-sm text-destructive">{actionError}</p>}
 
                 <div className="space-y-3 border-t border-border pt-3">
-                  <div className="flex flex-wrap gap-2">
-                    <Button size="sm" variant="default" disabled={busy} onClick={() => updateStatus(selected.id, SELLER_STATUS.APPROVED)}>
-                      <Check className="h-4 w-4" /> আবেদন অনুমোদন
-                    </Button>
-                    <Button size="sm" variant="outline" disabled={busy} onClick={() => updateStatus(selected.id, SELLER_STATUS.REJECTED)}>
-                      <X className="h-4 w-4" /> আবেদন প্রত্যাখ্যান
-                    </Button>
+                  <div className="rounded-xl bg-secondary/40 p-3">
+                    <p className="text-xs text-muted-foreground">প্রোভাইডার অনুমোদন/প্রত্যাখ্যান এখন শুধুমাত্র ভেরিফিকেশন প্যানেল থেকে করা হয়।</p>
+                    <Link to={ROUTES.ADMIN_VERIFICATIONS} className="mt-2 inline-flex min-h-9 items-center rounded-lg bg-primary px-3 text-xs font-semibold text-primary-foreground">ভেরিফিকেশন প্যানেল খুলুন</Link>
                   </div>
                   <div className="flex flex-wrap gap-2">
                     <Button size="sm" variant="outline" disabled={busy} onClick={toggleActive}>
@@ -348,7 +325,7 @@ export default function SellerManagePage() {
                     </Button>
                   </div>
                   <p className="text-xs text-muted-foreground">
-                    নিরাপত্তার জন্য ডাক্তার অ্যাকাউন্ট ডিলিট করার অনুমতি শুধুমাত্র নির্দিষ্ট Admin-এর আছে।
+                    নিরাপত্তার জন্য প্রোভাইডার অ্যাকাউন্ট ডিলিট করার অনুমতি শুধুমাত্র Super Admin-এর আছে।
                   </p>
                 </div>
               </div>

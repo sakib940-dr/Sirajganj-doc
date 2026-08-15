@@ -1,19 +1,25 @@
 import { useCallback, useEffect, useState } from "react";
-import { supabase } from "@/lib/supabaseClient";
-import { calculateDistanceKm } from "@/lib/geo";
+import { searchNearbyAmbulances } from "@/services/discoveryService";
 
 export function useAmbulances({ latitude = null, longitude = null } = {}) {
   const [ambulances, setAmbulances] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const load = useCallback(async () => {
     setLoading(true);
-    const { data } = await supabase.from("ambulance_services").select("*").order("is_available", { ascending: false }).order("name");
-    const rows = (data || []).map((a) => ({
-      ...a,
-      distance_km: calculateDistanceKm(latitude, longitude, a.latitude, a.longitude),
-    })).sort((a,b) => (a.distance_km ?? 1e9) - (b.distance_km ?? 1e9));
-    setAmbulances(rows); setLoading(false);
+    setError(null);
+    const hasCoords = Number.isFinite(Number(latitude)) && Number.isFinite(Number(longitude));
+    const { data, error: rpcError } = await searchNearbyAmbulances({
+      p_latitude: hasCoords ? Number(latitude) : null,
+      p_longitude: hasCoords ? Number(longitude) : null,
+      p_radius_km: hasCoords ? 100 : null,
+      p_limit: 50,
+      p_offset: 0,
+    });
+    setAmbulances(rpcError ? [] : (data || []));
+    setError(rpcError?.message || null);
+    setLoading(false);
   }, [latitude, longitude]);
   useEffect(() => { load(); }, [load]);
-  return { ambulances, loading, refresh: load };
+  return { ambulances, loading, error, refresh: load };
 }

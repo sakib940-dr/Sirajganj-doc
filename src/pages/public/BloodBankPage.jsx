@@ -20,7 +20,7 @@ export default function BloodBankPage() {
   useEffect(() => { document.title = "রক্ত ব্যাংক — সিরাজগঞ্জ ডাক্তার"; }, []);
 
   async function sendRequest() {
-    if (!selected || !isLoggedIn || !profile?.full_name || !selected.phone) return;
+    if (!selected || !isLoggedIn || !profile?.full_name || !selected.can_request) return;
     setSending(true); setMessage("");
     const { error: requestError } = await createBloodRequest({
       donorId:selected.id, bloodGroup:selected.blood_group, patientName:profile.full_name,
@@ -43,7 +43,7 @@ export default function BloodBankPage() {
       </div>
     </div>
 
-    {!isLoggedIn && <div className="mt-4 rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">দাতাকে রক্তের অনুরোধ পাঠাতে আগে রোগী হিসেবে লগইন করুন।</div>}
+    {!isLoggedIn && <div className="mt-4 rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">রক্তের অনুরোধ পাঠাতে আগে রোগী হিসেবে লগইন করুন।</div>}
     {error && <div className="mt-4 rounded-xl bg-destructive/10 p-3 text-sm text-destructive">রক্তদাতার তালিকা লোড করা যায়নি।</div>}
 
     <div className="mt-5 space-y-3">
@@ -56,14 +56,14 @@ export default function BloodBankPage() {
             <div className="flex flex-wrap items-center gap-2"><h2 className="font-semibold">{d.full_name || "স্বেচ্ছাসেবী রক্তদাতা"}</h2><span className="rounded-full bg-red-50 px-2 py-0.5 text-xs font-bold text-red-600">{d.blood_group}</span><ShieldCheck className="h-4 w-4 text-primary" /></div>
             <div className="mt-1 flex flex-wrap gap-x-3 gap-y-1 text-xs text-muted-foreground">
               {(d.location_upazila || d.location_district) && <span className="flex items-center gap-1"><MapPin className="h-3.5 w-3.5" />{[d.location_upazila,d.location_district].filter(Boolean).join(", ")}</span>}
-              {d.distance_km != null && <span>{d.distance_km < 1 ? `${Math.round(d.distance_km*1000)} মিটার দূরে` : `${d.distance_km.toFixed(1)} কিমি দূরে`}</span>}
+              {d.distance_km != null && <span>{d.distance_km <= 1 ? "প্রায় ১ কিমির মধ্যে" : `প্রায় ${Math.round(d.distance_km)} কিমি দূরে`}</span>}
               {d.last_blood_donation_date && <span className="flex items-center gap-1"><Clock3 className="h-3.5 w-3.5" />শেষ রক্তদান: {d.last_blood_donation_date}</span>}
             </div>
           </div>
         </div>
         <div className="mt-3 flex gap-2">
           {d.phone ? <a href={`tel:${d.phone}`} className="inline-flex h-9 items-center gap-1 rounded-lg border px-3 text-sm font-medium"><Phone className="h-4 w-4" /> {d.phone}</a> : <Button size="sm" variant="outline" disabled>ফোন নম্বর গোপন</Button>}
-          <Button size="sm" onClick={()=>setSelected(d)}><Send className="h-4 w-4" /> রক্তের অনুরোধ</Button>
+          <Button size="sm" disabled={!d.can_request} onClick={()=>setSelected(d)}><Send className="h-4 w-4" /> {d.can_request ? "রক্তের অনুরোধ" : "অনুরোধ বন্ধ"}</Button>
         </div>
       </div>)}
     </div>

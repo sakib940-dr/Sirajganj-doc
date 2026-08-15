@@ -15,6 +15,7 @@ import {
   LogOut,
   Shield,
   Ambulance,
+  Droplets,
 } from "lucide-react";
 import AdminSidebarNav from "@/components/layout/AdminSidebarNav.jsx";
 import { ROUTES } from "@/constants/routes";
@@ -34,16 +35,23 @@ export default function AdminLayout() {
         items: [{ to: ROUTES.ADMIN, label: "ড্যাশবোর্ড", icon: LayoutDashboard, end: true }],
       },
       {
-        title: "ডাক্তার ব্যবস্থাপনা",
+        title: "ডাক্তার ও হাসপাতাল",
         items: [
-          { to: ROUTES.ADMIN_SELLERS, label: "ডাক্তার ম্যানেজমেন্ট", icon: Users },
-          { to: ROUTES.ADMIN_VERIFICATIONS, label: "ডাক্তার ভেরিফিকেশন", icon: ShieldCheck },
+          { to: ROUTES.ADMIN_SELLERS, label: "ডাক্তার ও হাসপাতাল ম্যানেজমেন্ট", icon: Users },
+          { to: ROUTES.ADMIN_VERIFICATIONS, label: "ডাক্তার ও হাসপাতাল ভেরিফিকেশন", icon: ShieldCheck },
         ],
       },
       {
-        title: "ক্যাটালগ",
+        title: "স্বাস্থ্যসেবা অপারেশন",
         items: [
-          { to: ROUTES.ADMIN_CATEGORIES, label: "ক্যাটাগরি", icon: FolderTree },
+          { to: ROUTES.ADMIN_BLOOD_DONORS, label: "রক্তদাতা ও রক্তের অনুরোধ", icon: Droplets },
+          { to: ROUTES.ADMIN_AMBULANCE, label: "অ্যাম্বুলেন্স", icon: Ambulance },
+        ],
+      },
+      {
+        title: "ডাক্তার ডিরেক্টরি",
+        items: [
+          { to: ROUTES.ADMIN_CATEGORIES, label: "বিশেষত্ব / ক্যাটাগরি", icon: FolderTree },
           { to: ROUTES.ADMIN_PRODUCTS, label: "ডাক্তার প্রোফাইল ম্যানেজমেন্ট", icon: Package },
         ],
       },
@@ -59,7 +67,6 @@ export default function AdminLayout() {
             {
               title: "সাইট কনফিগারেশন",
               items: [
-                { to: ROUTES.ADMIN_AMBULANCE, label: "অ্যাম্বুলেন্স", icon: Ambulance },
                 { to: ROUTES.ADMIN_CMS, label: "CMS প্যানেল", icon: Palette },
                 { to: ROUTES.ADMIN_BANNERS, label: "ব্যানার (দ্রুত অ্যাক্সেস)", icon: GalleryHorizontal },
               ],

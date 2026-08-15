@@ -6,18 +6,24 @@ import { useAuth } from "@/hooks/useAuth";
 import { ROUTES } from "@/constants/routes";
 import { useBloodRequests, updateBloodRequestStatus } from "@/hooks/useBloodBank";
 
+const BLOOD_STATUS_LABEL = { pending:"অপেক্ষমাণ", accepted:"গৃহীত", declined:"প্রত্যাখ্যাত", cancelled:"বাতিল", completed:"সম্পন্ন" };
+
 function IncomingBloodRequests({ requests, loading, refresh }) {
-  async function change(id, status) { await updateBloodRequestStatus(id, status); refresh(); }
+  async function change(id, status) { const { error } = await updateBloodRequestStatus(id, status); if (error) window.alert(error.message); else refresh(); }
   return <div className="mt-6 rounded-2xl border border-red-100 bg-card p-5 shadow-sm">
     <div className="flex items-center gap-2"><Bell className="h-5 w-5 text-red-600"/><h2 className="font-semibold">আমার কাছে আসা রক্তের অনুরোধ</h2></div>
-    <p className="mt-1 text-xs text-muted-foreground">আপনার রক্তের গ্রুপের জন্য রোগীরা পাঠানো অনুরোধ এখানে দেখাবে।</p>
-    {loading ? <p className="mt-4 text-sm text-muted-foreground">লোড হচ্ছে...</p> : !requests.length ? <p className="mt-4 text-sm text-muted-foreground">এখনো কোনো রক্তের অনুরোধ আসেনি।</p> : <div className="mt-4 space-y-3">{requests.slice(0,10).map(r=><div key={r.id} className="rounded-xl border p-3"><div className="flex items-start justify-between gap-3"><div><p className="font-semibold">{r.patient_name} • {r.blood_group}</p><p className="mt-1 text-xs text-muted-foreground">{r.needed_date || "তারিখ নির্ধারিত নয়"}{r.needed_time?` • ${r.needed_time}`:""}</p><p className="mt-2 text-sm">{r.reason}</p>{r.hospital_name&&<p className="mt-1 text-xs text-muted-foreground">স্থান: {r.hospital_name}{r.location_text?` — ${r.location_text}`:""}</p>}</div><span className="rounded-full bg-secondary px-2 py-1 text-xs">{r.status}</span></div>{r.status==='pending'&&<div className="mt-3 flex gap-2"><button onClick={()=>change(r.id,'accepted')} className="inline-flex items-center gap-1 rounded-lg bg-primary px-3 py-2 text-xs font-semibold text-primary-foreground"><CheckCircle2 className="h-4 w-4"/> গ্রহণ</button><button onClick={()=>change(r.id,'declined')} className="inline-flex items-center gap-1 rounded-lg border px-3 py-2 text-xs font-semibold"><XCircle className="h-4 w-4"/> প্রত্যাখ্যান</button></div>}</div>)}</div>}
+    <p className="mt-1 text-xs text-muted-foreground">আপনার কাছে পাঠানো রক্তের অনুরোধের অবস্থা এখান থেকে পরিচালনা করুন।</p>
+    {loading ? <p className="mt-4 text-sm text-muted-foreground">লোড হচ্ছে...</p> : !requests.length ? <p className="mt-4 text-sm text-muted-foreground">এখনো কোনো রক্তের অনুরোধ আসেনি।</p> : <div className="mt-4 space-y-3">{requests.slice(0,10).map(r=><div key={r.id} className="rounded-xl border p-3">
+      <div className="flex items-start justify-between gap-3"><div><p className="font-semibold">{r.patient_name} • {r.blood_group}</p><p className="mt-1 text-xs text-muted-foreground">{r.request_number ? `#${r.request_number} • ` : ""}{r.needed_date || "তারিখ নির্ধারিত নয়"}{r.needed_time?` • ${r.needed_time}`:""}</p><p className="mt-2 text-sm">{r.reason}</p>{r.patient_phone&&<p className="mt-1 text-xs text-muted-foreground">যোগাযোগ: <a className="font-medium text-primary underline-offset-2 hover:underline" href={`tel:${r.patient_phone}`}>{r.patient_phone}</a></p>}{r.hospital_name&&<p className="mt-1 text-xs text-muted-foreground">স্থান: {r.hospital_name}{r.location_text?` — ${r.location_text}`:""}</p>}</div><span className="rounded-full bg-secondary px-2 py-1 text-xs">{BLOOD_STATUS_LABEL[r.status]||r.status}</span></div>
+      {r.status==='pending'&&<div className="mt-3 flex flex-wrap gap-2"><button onClick={()=>change(r.id,'accepted')} className="inline-flex items-center gap-1 rounded-lg bg-primary px-3 py-2 text-xs font-semibold text-primary-foreground"><CheckCircle2 className="h-4 w-4"/> গ্রহণ</button><button onClick={()=>change(r.id,'declined')} className="inline-flex items-center gap-1 rounded-lg border px-3 py-2 text-xs font-semibold"><XCircle className="h-4 w-4"/> প্রত্যাখ্যান</button></div>}
+      {r.status==='accepted'&&<button onClick={()=>change(r.id,'completed')} className="mt-3 inline-flex items-center gap-1 rounded-lg bg-primary px-3 py-2 text-xs font-semibold text-primary-foreground"><CheckCircle2 className="h-4 w-4"/> রক্তদান সম্পন্ন</button>}
+    </div>)}</div>}
   </div>;
 }
 
 export default function PatientDashboardPage() {
   const { profile, user, signOut } = useAuth();
-  const { requests, loading: bloodLoading } = useBloodRequests({ userId: user?.id, role: "patient" });
+  const { requests, loading: bloodLoading, refresh: refreshOutgoing } = useBloodRequests({ userId: user?.id, role: "patient" });
   const { requests: incomingBloodRequests, loading: incomingLoading, refresh: refreshIncoming } = useBloodRequests({ userId: user?.id, role: "patient", mode: "donor", enabled: !!profile?.blood_donor_volunteer });
 
   return (
@@ -86,7 +92,7 @@ export default function PatientDashboardPage() {
       <div className="mt-6 rounded-2xl border bg-card p-5 shadow-sm">
         <div className="flex items-center gap-2"><Bell className="h-5 w-5 text-primary"/><h2 className="font-semibold">আমার পাঠানো রক্তের অনুরোধ</h2></div>
         <p className="mt-1 text-xs text-muted-foreground">আপনি যেসব স্বেচ্ছাসেবী রক্তদাতাকে অনুরোধ পাঠিয়েছেন</p>
-        {bloodLoading ? <p className="mt-4 text-sm text-muted-foreground">লোড হচ্ছে...</p> : !requests.length ? <p className="mt-4 text-sm text-muted-foreground">এখনো কোনো রক্তের অনুরোধ নেই।</p> : <div className="mt-4 space-y-2">{requests.slice(0,5).map(r=><div key={r.id} className="flex items-center justify-between rounded-xl bg-secondary/60 p-3 text-sm"><span><b>{r.blood_group}</b> • {r.patient_name}<small className="block text-muted-foreground">{r.reason}</small></span><span className="rounded-full bg-background px-2 py-1 text-xs">{r.status}</span></div>)}</div>}
+        {bloodLoading ? <p className="mt-4 text-sm text-muted-foreground">লোড হচ্ছে...</p> : !requests.length ? <p className="mt-4 text-sm text-muted-foreground">এখনো কোনো রক্তের অনুরোধ নেই।</p> : <div className="mt-4 space-y-2">{requests.slice(0,10).map(r=><div key={r.id} className="rounded-xl bg-secondary/60 p-3 text-sm"><div className="flex items-start justify-between gap-3"><span><b>{r.blood_group}</b>{r.request_number?` • #${r.request_number}`:""}<small className="block text-muted-foreground">{r.reason}</small>{r.donor_contact_phone&&['accepted','completed'].includes(r.status)&&<small className="mt-1 block text-muted-foreground">রক্তদাতার যোগাযোগ: <a className="font-semibold text-primary hover:underline" href={`tel:${r.donor_contact_phone}`}>{r.donor_contact_phone}</a></small>}</span><span className="rounded-full bg-background px-2 py-1 text-xs">{BLOOD_STATUS_LABEL[r.status]||r.status}</span></div>{['pending','accepted'].includes(r.status)&&<button onClick={async()=>{if(!window.confirm("রক্তের অনুরোধ বাতিল করবেন?"))return;const {error}=await updateBloodRequestStatus(r.id,'cancelled');if(error)window.alert(error.message);else refreshOutgoing();}} className="mt-2 rounded-lg border px-3 py-2 text-xs font-semibold text-destructive">অনুরোধ বাতিল করুন</button>}</div>)}</div>}
       </div>
     </div>
   );

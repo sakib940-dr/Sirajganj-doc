@@ -3,9 +3,8 @@
 // এই Edge Function ইউজার ban / unban / delete করার অনুমতি দেয়:
 //   - Super Admin: যেকোনো ইউজারের উপর ban/unban/delete করতে পারবেন (শেষ
 //     Super Admin বাদে)।
-//   - Admin: শুধুমাত্র "seller" রোলের অ্যাকাউন্ট ban/unban (active/deactivate)
-//     করতে পারবেন — delete করতে পারবেন না, অন্য কোনো role-এর অ্যাকাউন্টেও
-//     হাত দিতে পারবেন না।
+//   - Admin: শুধুমাত্র healthcare provider (doctor/hospital; legacy seller) অ্যাকাউন্ট
+//     ban/unban (active/deactivate) করতে পারবেন — delete করতে পারবেন না।
 // service_role key কখনো browser-এ পাঠানো হয় না — এটা শুধু এই সার্ভার-সাইড
 // ফাংশনের ভেতরেই ব্যবহৃত হয়।
 // (এটি admin-reset-password ফাংশনের মতোই একই security প্যাটার্ন অনুসরণ করে।)
@@ -87,10 +86,9 @@ Deno.serve(async (req) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
     );
 
-    // Normal Admin (super_admin নন) শুধুমাত্র "seller" রোলের অ্যাকাউন্ট
-    // active/deactivate (ban/unban) করতে পারবেন — delete করতে পারবেন না,
-    // অন্য কোনো role-এর (visitor/admin/super_admin) অ্যাকাউন্টেও হাত দিতে
-    // পারবেন না। এই স্কোপ-চেকটা Super Admin-এর জন্য প্রযোজ্য নয়।
+    // Normal Admin (super_admin নন) শুধুমাত্র Doctor/Hospital provider account
+    // active/deactivate (ban/unban) করতে পারবেন — delete করতে পারবেন না।
+    // Legacy `seller` role-ও transition compatibility-এর জন্য স্বীকৃত।
     if (isAdminCaller) {
       if (action === "delete") {
         return new Response(
@@ -105,9 +103,9 @@ Deno.serve(async (req) => {
         .eq("id", userId)
         .single();
 
-      if (targetProfileForScope?.role !== "seller") {
+      if (!["doctor", "hospital", "seller"].includes(targetProfileForScope?.role ?? "")) {
         return new Response(
-          JSON.stringify({ error: "Admin শুধুমাত্র সেলার অ্যাকাউন্ট active/deactivate করতে পারবেন।" }),
+          JSON.stringify({ error: "Admin শুধুমাত্র ডাক্তার/হাসপাতাল provider account active/deactivate করতে পারবেন।" }),
           { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
       }

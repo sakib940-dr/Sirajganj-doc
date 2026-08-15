@@ -43,7 +43,8 @@ export default function HomePage() {
 
   useEffect(() => {
     const asked = window.localStorage.getItem("doctor_v1_location_prompted");
-    if (!asked) {
+    const savedLocation = window.localStorage.getItem("doctor_v1_last_location");
+    if (!asked && !savedLocation) {
       const timer = window.setTimeout(() => {
         window.localStorage.setItem("doctor_v1_location_prompted", "1");
         requestLocation();

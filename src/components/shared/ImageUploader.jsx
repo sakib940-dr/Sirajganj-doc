@@ -1,9 +1,10 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Upload, X, ImageIcon, AlertCircle } from "lucide-react";
 import { supabase } from "@/lib/supabaseClient";
 import { compressImageToRange } from "@/lib/imageCompression";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { resolvePrivateStorageUrl } from "@/lib/storageAssets";
 
 const DEFAULT_MAX_SIZE_KB = 1024;
 
@@ -28,12 +29,30 @@ export default function ImageUploader({
   autoCompress = true,
   compressTargetMinKB = 100,
   compressTargetMaxKB = 200,
+  privateBucket = false,
 }) {
   const inputRef = useRef(null);
   const [uploading, setUploading] = useState(false);
   const [compressing, setCompressing] = useState(false);
   const [error, setError] = useState("");
+  const [previewUrl, setPreviewUrl] = useState(privateBucket ? "" : (value || ""));
   const maxSizeBytes = maxSizeKB * 1024;
+
+  useEffect(() => {
+    let active = true;
+    if (!privateBucket) {
+      setPreviewUrl(value || "");
+      return () => { active = false; };
+    }
+    if (!value) {
+      setPreviewUrl("");
+      return () => { active = false; };
+    }
+    resolvePrivateStorageUrl(value, bucket).then((url) => {
+      if (active) setPreviewUrl(url || "");
+    });
+    return () => { active = false; };
+  }, [value, bucket, privateBucket]);
 
   const handleFile = async (e) => {
     let file = e.target.files?.[0];
@@ -88,8 +107,15 @@ export default function ImageUploader({
       return;
     }
 
-    const { data } = supabase.storage.from(bucket).getPublicUrl(path);
-    onUploaded(data.publicUrl);
+    if (privateBucket) {
+      const { data: signed } = await supabase.storage.from(bucket).createSignedUrl(path, 1800);
+      setPreviewUrl(signed?.signedUrl || "");
+      onUploaded(path);
+    } else {
+      const { data } = supabase.storage.from(bucket).getPublicUrl(path);
+      setPreviewUrl(data.publicUrl);
+      onUploaded(data.publicUrl);
+    }
     setUploading(false);
   };
 
@@ -101,12 +127,12 @@ export default function ImageUploader({
           aspect === "square" ? "h-28 w-28" : "h-28 w-full"
         )}
       >
-        {value ? (
+        {previewUrl ? (
           <>
-            <img src={value} alt="" className="h-full w-full object-cover" />
+            <img src={previewUrl} alt="" className="h-full w-full object-cover" />
             <button
               type="button"
-              onClick={() => onUploaded("")}
+              onClick={() => { setPreviewUrl(""); onUploaded(""); }}
               className="absolute right-1 top-1 flex h-6 w-6 items-center justify-center rounded-full bg-destructive text-destructive-foreground"
               aria-label="ছবি মুছুন"
             >

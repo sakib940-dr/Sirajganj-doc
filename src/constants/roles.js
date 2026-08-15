@@ -50,12 +50,14 @@ export const DOCTOR_STATUS_LABEL_BN = {
 
 export const VERIFICATION_STATUS = {
   PENDING: "pending",
+  UNDER_REVIEW: "under_review",
   APPROVED: "approved",
   REJECTED: "rejected",
 };
 
 export const VERIFICATION_STATUS_LABEL_BN = {
-  [VERIFICATION_STATUS.PENDING]: "পর্যালোচনাধীন",
+  [VERIFICATION_STATUS.PENDING]: "অপেক্ষমাণ",
+  [VERIFICATION_STATUS.UNDER_REVIEW]: "পর্যালোচনাধীন",
   [VERIFICATION_STATUS.APPROVED]: "ভেরিফাইড",
   [VERIFICATION_STATUS.REJECTED]: "প্রত্যাখ্যাত",
 };

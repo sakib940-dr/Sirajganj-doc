@@ -37,6 +37,8 @@ export const ROUTES = {
   DASHBOARD_VERIFICATION: "/dashboard/verification",
   DASHBOARD_ANALYTICS: "/dashboard/analytics",
   DASHBOARD_APPOINTMENTS: "/dashboard/appointments",
+  DASHBOARD_SCHEDULE: "/dashboard/schedule",
+  DASHBOARD_AFFILIATIONS: "/dashboard/affiliations",
   APPOINTMENTS: "/appointments",
 
   ADMIN: "/admin",
@@ -51,6 +53,7 @@ export const ROUTES = {
   ADMIN_BANNERS: "/admin/banners",
   ADMIN_CMS: "/admin/cms",
   ADMIN_AMBULANCE: "/admin/ambulance",
+  ADMIN_BLOOD_DONORS: "/admin/blood-donors",
 };
 
 export const categoryPath = (slug) => `/category/${slug}`;

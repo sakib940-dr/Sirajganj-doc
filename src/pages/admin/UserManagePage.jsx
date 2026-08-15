@@ -1,4 +1,5 @@
 import { useEffect, useState, useCallback } from "react";
+import { Link } from "react-router-dom";
 import {
   Users,
   X,
@@ -12,6 +13,7 @@ import {
   BadgeCheck,
   Loader2,
   UserCircle2,
+  Navigation,
 } from "lucide-react";
 import { supabase } from "@/lib/supabaseClient";
 import { useAuth } from "@/hooks/useAuth";
@@ -19,6 +21,9 @@ import { Button } from "@/components/ui/button";
 import LoadingSpinner from "@/components/shared/LoadingSpinner.jsx";
 import EmptyState from "@/components/shared/EmptyState.jsx";
 import { formatDateBn } from "@/lib/utils";
+import PrivateStorageImageLightbox from "@/components/shared/PrivateStorageImageLightbox.jsx";
+import { fetchSuperAdminUserLocations } from "@/services/adminMedicalService";
+import { ROUTES } from "@/constants/routes";
 import {
   ROLES,
   ROLE_LABEL_BN,
@@ -47,6 +52,7 @@ export default function UserManagePage() {
   const isSuperAdmin = myRole === ROLES.SUPER_ADMIN;
 
   const [profiles, setProfiles] = useState([]);
+  const [locations, setLocations] = useState({});
   const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState(null); // profile row that was clicked
   const [detail, setDetail] = useState(null); // { verification, shop }
@@ -56,10 +62,16 @@ export default function UserManagePage() {
 
   const load = useCallback(async () => {
     setLoading(true);
-    const { data } = await supabase.from("profiles").select("*").order("created_at", { ascending: false });
+    const [{ data }, locationResult] = await Promise.all([
+      supabase.from("profiles").select("*").order("created_at", { ascending: false }),
+      isSuperAdmin ? fetchSuperAdminUserLocations() : Promise.resolve({ data: [] }),
+    ]);
     setProfiles(data ?? []);
+    const locationMap = {};
+    for (const row of locationResult?.data || []) locationMap[row.user_id] = row;
+    setLocations(locationMap);
     setLoading(false);
-  }, []);
+  }, [isSuperAdmin]);
 
   useEffect(() => {
     load();
@@ -116,18 +128,6 @@ export default function UserManagePage() {
     patchLocal(selected.id, { role: newRole });
   };
 
-  const updateProviderStatus = async (status) => {
-    if (!selected || ![ROLES.DOCTOR, ROLES.HOSPITAL].includes(selected.role)) return;
-    setBusy(true);
-    setActionError("");
-    const { error } = await supabase.from("profiles").update({ seller_status: status }).eq("id", selected.id);
-    setBusy(false);
-    if (error) {
-      setActionError(error.message);
-      return;
-    }
-    patchLocal(selected.id, { seller_status: status });
-  };
 
   const toggleBan = async () => {
     if (!selected) return;
@@ -222,6 +222,7 @@ export default function UserManagePage() {
               <th className="p-3 font-medium">নাম</th>
               <th className="p-3 font-medium">ফোন</th>
               <th className="p-3 font-medium">রোল</th>
+              <th className="p-3 font-medium">শেষ লোকেশন</th>
               <th className="p-3 font-medium">অ্যাকাউন্ট অবস্থা</th>
             </tr>
           </thead>
@@ -244,6 +245,7 @@ export default function UserManagePage() {
                     {ROLE_LABEL_BN[p.role] || p.role}
                   </span>
                 </td>
+                <td className="p-3 text-xs text-muted-foreground"><div className="flex flex-wrap items-center gap-2"><span>{[locations[p.id]?.upazila, locations[p.id]?.district].filter(Boolean).join(", ") || "লোকেশন নেই"}</span>{locations[p.id]?.latitude != null && locations[p.id]?.longitude != null && <a onClick={(e)=>e.stopPropagation()} target="_blank" rel="noreferrer" href={`https://www.google.com/maps/search/?api=1&query=${locations[p.id].latitude},${locations[p.id].longitude}`} className="inline-flex min-h-8 items-center gap-1 rounded-lg border bg-card px-2 text-[11px] font-semibold text-primary"><Navigation className="h-3.5 w-3.5"/> Maps</a>}</div></td>
                 <td className="p-3">
                   <span
                     className={`rounded-full px-2.5 py-1 text-xs font-medium ${
@@ -270,10 +272,11 @@ export default function UserManagePage() {
             <div className="mb-4 flex items-start justify-between gap-3">
               <div className="flex items-center gap-3">
                 {detail?.verification?.profile_photo_url ? (
-                  <img
-                    src={detail.verification.profile_photo_url}
-                    alt={selected.full_name || ""}
-                    className="h-14 w-14 rounded-full object-cover"
+                  <PrivateStorageImageLightbox
+                    value={detail.verification.profile_photo_url}
+                    alt={selected.full_name || "ভেরিফিকেশন প্রোফাইল ছবি"}
+                    shape="square"
+                    thumbClassName="h-14 w-14 rounded-full"
                   />
                 ) : (
                   <UserCircle2 className="h-14 w-14 text-muted-foreground" />
@@ -310,13 +313,19 @@ export default function UserManagePage() {
                 />
                 <DetailRow
                   icon={BadgeCheck}
-                  label="ডাক্তার ভেরিফিকেশন"
-                  value={
-                    detail?.verification
-                      ? VERIFICATION_STATUS_LABEL_BN[detail.verification.status]
-                      : "জমা দেওয়া হয়নি"
-                  }
+                  label="প্রোভাইডার ভেরিফিকেশন"
+                  value={detail?.verification ? VERIFICATION_STATUS_LABEL_BN[detail.verification.status] : "জমা দেওয়া হয়নি"}
                 />
+                {isSuperAdmin && <div className="rounded-xl border border-border bg-secondary/30 p-3">
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <p className="text-xs text-muted-foreground">শেষ জানা লোকেশন</p>
+                      <p className="mt-1 font-medium">{[locations[selected.id]?.upazila, locations[selected.id]?.district].filter(Boolean).join(", ") || "লোকেশন পাওয়া যায়নি"}</p>
+                      {locations[selected.id]?.updated_at && <p className="mt-1 text-xs text-muted-foreground">আপডেট: {formatDateBn(locations[selected.id].updated_at)} • উৎস: {locations[selected.id].source === "gps" ? "GPS" : locations[selected.id].source === "manual" ? "ম্যানুয়াল" : locations[selected.id].source || "—"}{locations[selected.id].accuracy_m != null ? ` • নির্ভুলতা ~${Math.round(locations[selected.id].accuracy_m)} মিটার` : ""}</p>}
+                    </div>
+                    {locations[selected.id]?.latitude != null && locations[selected.id]?.longitude != null && <a target="_blank" rel="noreferrer" href={`https://www.google.com/maps/search/?api=1&query=${locations[selected.id].latitude},${locations[selected.id].longitude}`} className="inline-flex min-h-10 shrink-0 items-center gap-1 rounded-lg border bg-card px-3 text-xs font-semibold text-primary"><Navigation className="h-4 w-4"/> Google Maps</a>}
+                  </div>
+                </div>}
                 <DetailRow label="যোগদান" value={formatDateBn(selected.created_at)} />
                 <DetailRow
                   label="অ্যাকাউন্ট অবস্থা"
@@ -371,11 +380,9 @@ export default function UserManagePage() {
                     </div>
                     {(selected.role === ROLES.DOCTOR || selected.role === ROLES.HOSPITAL) && (
                       <div className="rounded-xl border border-border bg-secondary/30 p-3">
-                        <p className="mb-2 text-xs font-medium">প্রোভাইডার অনুমোদন: <strong>{selected.seller_status === "approved" ? "অনুমোদিত" : selected.seller_status === "rejected" ? "প্রত্যাখ্যাত" : "অপেক্ষমাণ"}</strong></p>
-                        <div className="flex flex-wrap gap-2">
-                          <Button size="sm" disabled={busy} onClick={() => updateProviderStatus("approved")}>অনুমোদন করুন</Button>
-                          <Button size="sm" variant="outline" disabled={busy} onClick={() => updateProviderStatus("rejected")}>প্রত্যাখ্যান করুন</Button>
-                        </div>
+                        <p className="text-xs font-medium">প্রোভাইডার অবস্থা: <strong>{selected.seller_status === "approved" ? "অনুমোদিত" : selected.seller_status === "rejected" ? "প্রত্যাখ্যাত" : "অপেক্ষমাণ"}</strong></p>
+                        <p className="mt-1 text-xs text-muted-foreground">নিরাপত্তার জন্য প্রোভাইডার অনুমোদন শুধুমাত্র ভেরিফিকেশন প্যানেল থেকে করা যাবে।</p>
+                        <Link to={ROUTES.ADMIN_VERIFICATIONS} className="mt-2 inline-flex min-h-9 items-center rounded-lg bg-primary px-3 text-xs font-semibold text-primary-foreground">ভেরিফিকেশন প্যানেল খুলুন</Link>
                       </div>
                     )}
                     <div className="flex flex-wrap gap-2">

@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { CalendarDays, Eye, Heart, MapPin, UserRound, ArrowUpRight, Clock3 } from "lucide-react";
-import { supabase } from "@/lib/supabaseClient";
 import { useAuth } from "@/hooks/useAuth";
 import PendingApprovalNotice from "@/components/seller/PendingApprovalNotice.jsx";
 import { ROUTES } from "@/constants/routes";
 import { ROLES, SELLER_STATUS, isAdminOrAbove } from "@/constants/roles";
+import { getProviderDashboardSummary } from "@/services/providerService";
 
 function Metric({ icon: Icon, label, value, href }) {
   const content = (
@@ -27,27 +27,14 @@ export default function DashboardHome() {
   const { user, role, sellerStatus, profile } = useAuth();
   const [data, setData] = useState({ doctors: 0, appointments: 0, pending: 0, views: 0, saves: 0, loading: true });
 
-  const approved = isAdminOrAbove(role) || (role === ROLES.DOCTOR && sellerStatus === SELLER_STATUS.APPROVED);
+  const approved = isAdminOrAbove(role) || ([ROLES.DOCTOR, ROLES.HOSPITAL].includes(role) && sellerStatus === SELLER_STATUS.APPROVED);
 
   useEffect(() => {
     if (!user || !approved) return;
     let active = true;
     (async () => {
-      const ownerFilter = role === ROLES.HOSPITAL ? { owner: user.id } : { seller_id: user.id };
-      const [productsRes, appointmentsRes, pendingRes] = await Promise.all([
-        supabase.from("products").select("id, view_count, save_count", { count: "exact" }).match(ownerFilter),
-        supabase.from("appointments").select("id, status", { count: "exact" }).match({ ...(role === ROLES.HOSPITAL ? { hospital_id: user.id } : { doctor_id: user.id }), status: "pending" }),
-        supabase.from("seller_verifications").select("id", { count: "exact" }).match({ seller_id: user.id, status: "pending" }),
-      ]);
-      const rows = productsRes.data || [];
-      if (active) setData({
-        doctors: productsRes.count ?? rows.length,
-        appointments: appointmentsRes.count ?? 0,
-        pending: pendingRes.count ?? 0,
-        views: rows.reduce((s, r) => s + Number(r.view_count || 0), 0),
-        saves: rows.reduce((s, r) => s + Number(r.save_count || 0), 0),
-        loading: false,
-      });
+      const { data: summary } = await getProviderDashboardSummary(role, user.id);
+      if (active) setData({ ...summary, loading: false });
     })();
     return () => { active = false; };
   }, [user?.id, role, approved]);

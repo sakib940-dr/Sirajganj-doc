@@ -1,62 +1,28 @@
-import { useEffect, useState } from "react";
+import { useEffect,useMemo,useState } from "react";
 import { Link } from "react-router-dom";
-import { Users, UserRound, Building2, ShieldCheck, HeartPulse, Ambulance, ArrowUpRight, UserCog } from "lucide-react";
-import { supabase } from "@/lib/supabaseClient";
+import { Users,UserRound,Building2,ShieldCheck,HeartPulse,Ambulance,ArrowUpRight,CalendarDays,Clock3,CheckCircle2,MapPin,TrendingUp,Droplets } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { ROLES } from "@/constants/roles";
 import { ROUTES } from "@/constants/routes";
+import { fetchAdminMedicalAnalytics } from "@/services/adminMedicalService";
+import MedicalGrowthChart from "@/components/shared/charts/MedicalGrowthChart.jsx";
+import DonutStatChart from "@/components/shared/charts/DonutStatChart.jsx";
+import BarStatChart from "@/components/shared/charts/BarStatChart.jsx";
 
-function Card({ icon: Icon, label, value, href, accent = false }) {
-  const body = <div className={`rounded-2xl border bg-card p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md ${accent ? "border-primary/30" : "border-border"}`}>
-    <div className="flex items-start justify-between"><span className={`flex h-10 w-10 items-center justify-center rounded-xl ${accent ? "bg-primary text-primary-foreground" : "bg-primary/10 text-primary"}`}><Icon className="h-5 w-5" /></span>{href && <ArrowUpRight className="h-4 w-4 text-muted-foreground" />}</div>
-    <p className="mt-4 text-2xl font-bold">{value}</p><p className="mt-1 text-xs text-muted-foreground">{label}</p>
-  </div>;
-  return href ? <Link to={href}>{body}</Link> : body;
-}
-
-export default function AdminDashboard() {
-  const { role, profile } = useAuth();
-  const isSuper = role === ROLES.SUPER_ADMIN;
-  const [s, setS] = useState({ doctors: 0, chambers: 0, patients: 0, pending: 0, ambulances: 0, donors: 0, loading: true });
-  useEffect(() => {
-    let active = true;
-    (async () => {
-      const queries = await Promise.all([
-        supabase.from("profiles").select("id", { count: "exact", head: true }).eq("role", "doctor"),
-        supabase.from("shops").select("id", { count: "exact", head: true }),
-        supabase.from("profiles").select("id", { count: "exact", head: true }).eq("role", "patient"),
-        supabase.from("profiles").select("id", { count: "exact", head: true }).eq("role", "doctor").eq("seller_status", "pending"),
-        supabase.from("ambulances").select("id", { count: "exact", head: true }),
-        supabase.from("blood_donors").select("id", { count: "exact", head: true }).eq("is_volunteer", true),
-      ]);
-      if (active) setS({ doctors: queries[0].count || 0, chambers: queries[1].count || 0, patients: queries[2].count || 0, pending: queries[3].count || 0, ambulances: queries[4].count || 0, donors: queries[5].count || 0, loading: false });
-    })();
-    return () => { active = false; };
-  }, []);
-  const adminLinks = [
-    [ROUTES.ADMIN_SELLERS, UserRound, "ডাক্তার ব্যবস্থাপনা", "ডাক্তার অ্যাকাউন্ট ও প্রোফাইল পরিচালনা"],
-    [ROUTES.ADMIN_VERIFICATIONS, ShieldCheck, "ভেরিফিকেশন", "নতুন আবেদন যাচাই ও অনুমোদন"],
-    [ROUTES.ADMIN_USERS, Users, "ইউজার", "Patient, Doctor ও অন্যান্য অ্যাকাউন্ট"],
-    [ROUTES.ADMIN_AMBULANCE, Ambulance, "অ্যাম্বুলেন্স", "সেবা প্রদানকারী পরিচালনা"],
-  ];
-  return <div className="space-y-6">
-    <section className="rounded-3xl border border-border bg-card p-5 shadow-sm sm:p-7">
-      <p className="text-xs font-semibold text-primary">{isSuper ? "সুপার অ্যাডমিন" : "অ্যাডমিন"}</p>
-      <h1 className="mt-1 text-2xl font-bold tracking-tight sm:text-3xl">স্বাগতম, {profile?.full_name || "অ্যাডমিন"}</h1>
-      <p className="mt-2 text-sm text-muted-foreground">সিরাজগঞ্জ ডাক্তার প্ল্যাটফর্মের গুরুত্বপূর্ণ কাজগুলো এক নজরে পরিচালনা করুন।</p>
-    </section>
-    <section className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
-      <Card icon={UserRound} label="মোট ডাক্তার" value={s.doctors} href={ROUTES.ADMIN_SELLERS} />
-      <Card icon={Building2} label="চেম্বার / হাসপাতাল" value={s.chambers} />
-      <Card icon={Users} label="রোগী" value={s.patients} href={ROUTES.ADMIN_USERS} />
-      <Card icon={ShieldCheck} label="অপেক্ষমাণ যাচাই" value={s.pending} href={ROUTES.ADMIN_VERIFICATIONS} accent={s.pending > 0} />
-      <Card icon={HeartPulse} label="স্বেচ্ছাসেবী রক্তদাতা" value={s.donors} />
-      <Card icon={Ambulance} label="অ্যাম্বুলেন্স" value={s.ambulances} href={ROUTES.ADMIN_AMBULANCE} />
-    </section>
-    <section>
-      <div className="mb-3 flex items-end justify-between"><div><h2 className="text-lg font-bold">দ্রুত ব্যবস্থাপনা</h2><p className="text-sm text-muted-foreground">প্রয়োজনীয় কাজগুলো এখান থেকেই খুলুন।</p></div></div>
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">{adminLinks.map(([to, Icon, title, desc]) => <Link key={to} to={to} className="rounded-2xl border border-border bg-card p-5 shadow-sm transition hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-md"><Icon className="h-5 w-5 text-primary"/><h3 className="mt-4 font-semibold">{title}</h3><p className="mt-1 text-sm text-muted-foreground">{desc}</p><span className="mt-4 inline-flex items-center gap-1 text-xs font-semibold text-primary">খুলুন <ArrowUpRight className="h-3.5 w-3.5"/></span></Link>)}</div>
-    </section>
-    {isSuper && <section className="rounded-2xl border border-primary/20 bg-primary/5 p-5"><div className="flex items-start gap-3"><UserCog className="mt-0.5 h-5 w-5 text-primary"/><div><h2 className="font-semibold">সুপার অ্যাডমিন নিয়ন্ত্রণ</h2><p className="mt-1 text-sm text-muted-foreground">রোল পরিবর্তন, অ্যাডমিন তৈরি এবং পুরো সিস্টেমের settings পরিচালনা করতে ইউজার ব্যবস্থাপনা ব্যবহার করুন।</p><Link to={ROUTES.ADMIN_USERS} className="mt-3 inline-flex items-center gap-1 text-sm font-semibold text-primary">ইউজার ব্যবস্থাপনা <ArrowUpRight className="h-4 w-4"/></Link></div></div></section>}
-  </div>;
+function StatCard({icon:Icon,label,value,href,growth,accent=false}){const body=<div className={`rounded-2xl border bg-card p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md ${accent?"border-primary/30":"border-border"}`}><div className="flex items-start justify-between"><span className={`flex h-10 w-10 items-center justify-center rounded-xl ${accent?"bg-primary text-primary-foreground":"bg-primary/10 text-primary"}`}><Icon className="h-5 w-5"/></span>{href&&<ArrowUpRight className="h-4 w-4 text-muted-foreground"/>}</div><p className="mt-4 text-2xl font-bold">{Number(value||0).toLocaleString()}</p><div className="mt-1 flex items-center justify-between gap-2"><p className="text-xs text-muted-foreground">{label}</p>{growth!=null&&<span className={`text-[11px] font-semibold ${growth>=0?"text-primary":"text-destructive"}`}>{growth>=0?"+":""}{growth}%</span>}</div></div>;return href?<Link to={href}>{body}</Link>:body;}
+function growthPct(current,previous){current=Number(current||0);previous=Number(previous||0);if(previous===0)return current>0?100:0;return Math.round(((current-previous)/previous)*1000)/10;}
+const APT_LABEL={pending:"অপেক্ষমাণ",confirmed:"নিশ্চিত",rescheduled:"পুনঃনির্ধারিত",completed:"সম্পন্ন",cancelled:"বাতিল",no_show:"রোগী আসেননি"};
+export default function AdminDashboard(){
+ const{role,profile}=useAuth();const isSuper=role===ROLES.SUPER_ADMIN;const[days,setDays]=useState(30);const[data,setData]=useState(null);const[loading,setLoading]=useState(true);const[error,setError]=useState("");
+ useEffect(()=>{let active=true;setLoading(true);fetchAdminMedicalAnalytics(days).then(({data,error})=>{if(!active)return;if(error)setError(error.message);else{setData(data);setError("");}setLoading(false);});return()=>{active=false;};},[days]);
+ const totals=data?.totals||{},g=data?.growth||{};const aptData=useMemo(()=>(data?.appointment_status||[]).map(x=>({label:APT_LABEL[x.status]||x.status,value:Number(x.value||0)})),[data]);const bloodData=useMemo(()=>(data?.blood_groups||[]).map(x=>({label:x.blood_group||"অজানা",value:Number(x.value||0)})),[data]);
+ const quick=[[ROUTES.ADMIN_SELLERS,UserRound,"ডাক্তার ও হাসপাতাল","প্রোভাইডার অ্যাকাউন্ট ও অবস্থা"],[ROUTES.ADMIN_VERIFICATIONS,ShieldCheck,"ভেরিফিকেশন","ডাক্তার ও হাসপাতালের নথি যাচাই"],[ROUTES.ADMIN_BLOOD_DONORS,Droplets,"রক্তদাতা","রক্তদাতা ও রক্তের অনুরোধ"],[ROUTES.ADMIN_AMBULANCE,Ambulance,"অ্যাম্বুলেন্স","সেবা, উপলভ্যতা ও যোগাযোগ"]];if(isSuper)quick.push([ROUTES.ADMIN_USERS,Users,"ইউজার ও লোকেশন","রোল, account status ও last location"]);
+ return <div className="space-y-6">
+  <section className="rounded-3xl border bg-card p-5 shadow-sm sm:p-7"><div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between"><div><p className="text-xs font-semibold text-primary">{isSuper?"সুপার অ্যাডমিন":"অ্যাডমিন"} মেডিকেল অপারেশনস</p><h1 className="mt-1 text-2xl font-bold tracking-tight sm:text-3xl">স্বাগতম, {profile?.full_name||"অ্যাডমিন"}</h1><p className="mt-2 text-sm text-muted-foreground">ডাক্তার, হাসপাতাল, অ্যাপয়েন্টমেন্ট, রক্তদাতা ও অ্যাম্বুলেন্সের বাস্তব অপারেশন এক নজরে।</p></div><div className="flex rounded-xl border bg-background p-1">{[7,30,90].map(n=><button key={n} onClick={()=>setDays(n)} className={`rounded-lg px-3 py-2 text-xs font-semibold ${days===n?"bg-primary text-primary-foreground":"text-muted-foreground"}`}>{n} দিন</button>)}</div></div>{error&&<p className="mt-3 rounded-lg bg-destructive/10 p-3 text-sm text-destructive">{error}</p>}</section>
+  <section className="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-4"><StatCard icon={UserRound} label="অনুমোদিত ডাক্তার" value={totals.approved_doctors} href={ROUTES.ADMIN_SELLERS} growth={growthPct(g.doctors_current,g.doctors_previous)}/><StatCard icon={Building2} label="অনুমোদিত হাসপাতাল" value={totals.approved_hospitals}/><StatCard icon={Users} label="মোট রোগী" value={totals.patients}/><StatCard icon={ShieldCheck} label="অপেক্ষমাণ ভেরিফিকেশন" value={totals.pending_verifications} href={ROUTES.ADMIN_VERIFICATIONS} accent={Number(totals.pending_verifications)>0}/><StatCard icon={CalendarDays} label="আজকের অ্যাপয়েন্টমেন্ট" value={totals.appointments_today} growth={growthPct(g.appointments_current,g.appointments_previous)}/><StatCard icon={Clock3} label="অপেক্ষমাণ অ্যাপয়েন্টমেন্ট" value={totals.appointments_pending}/><StatCard icon={HeartPulse} label="সক্রিয় রক্তদাতা" value={totals.active_donors} href={ROUTES.ADMIN_BLOOD_DONORS}/><StatCard icon={Droplets} label="অপেক্ষমাণ রক্তের অনুরোধ" value={totals.pending_blood_requests} href={ROUTES.ADMIN_BLOOD_DONORS} growth={growthPct(g.blood_requests_current,g.blood_requests_previous)}/><StatCard icon={Ambulance} label="উপলভ্য অ্যাম্বুলেন্স" value={totals.available_ambulances} href={ROUTES.ADMIN_AMBULANCE}/>{isSuper&&<StatCard icon={MapPin} label="লোকেশন সংরক্ষিত ইউজার" value={totals.users_with_location} href={ROUTES.ADMIN_USERS}/>}<StatCard icon={CheckCircle2} label="সম্পন্ন অ্যাপয়েন্টমেন্ট" value={totals.appointments_completed}/><StatCard icon={TrendingUp} label="মোট ইউজার" value={totals.users} growth={growthPct(g.users_current,g.users_previous)}/></section>
+  <MedicalGrowthChart data={data?.daily||[]} loading={loading}/>
+  <section className="grid gap-4 lg:grid-cols-2"><DonutStatChart title="অ্যাপয়েন্টমেন্টের অবস্থা" description="সব অ্যাপয়েন্টমেন্ট অবস্থার বর্তমান চিত্র" data={aptData} loading={loading} centerLabel="অ্যাপয়েন্টমেন্ট"/><BarStatChart title="রক্তের গ্রুপ অনুযায়ী সক্রিয় দাতা" description="রক্তের গ্রুপভিত্তিক বর্তমানে সক্রিয় দাতার সংখ্যা" data={bloodData} loading={loading} valueLabel="দাতা" height={250}/></section>
+  <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">{quick.map(([to,Icon,title,desc])=><Link key={to} to={to} className="rounded-2xl border bg-card p-5 shadow-sm transition hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-md"><Icon className="h-5 w-5 text-primary"/><h3 className="mt-4 font-semibold">{title}</h3><p className="mt-1 text-sm text-muted-foreground">{desc}</p><span className="mt-4 inline-flex items-center gap-1 text-xs font-semibold text-primary">খুলুন <ArrowUpRight className="h-3.5 w-3.5"/></span></Link>)}</section>
+  <section className="rounded-2xl border bg-card p-4 text-sm text-muted-foreground">অ্যাম্বুলেন্স ব্যবহার: <b className="text-foreground">{data?.ambulance_engagement?.call_clicks||0}</b> কল ক্লিক • <b className="text-foreground">{data?.ambulance_engagement?.direction_clicks||0}</b> ম্যাপ/দিকনির্দেশনা ক্লিক</section>
+ </div>;
 }
