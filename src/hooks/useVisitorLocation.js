@@ -7,7 +7,7 @@ const DISTRICT_ALIASES = { "সিরাজগঞ্জ": "সিরাজগঞ
 function findBanglaUpazila(addressText = "") {
   const normalized = addressText.toLowerCase();
   const aliases = {
-    "সিরাজগঞ্জ সদর": ["সিরাজগঞ্জ সদর", "sirajganj sadar", "sirajganj"], "বেলকুচি": ["বেলকুচি", "belkuchi"],
+    "সিরাজগঞ্জ সদর": ["সিরাজগঞ্জ সদর", "sirajganj sadar"], "বেলকুচি": ["বেলকুচি", "belkuchi"],
     "চৌহালী": ["চৌহালী", "chauhali"], "কামারখন্দ": ["কামারখন্দ", "kamarkhanda"], "কাজীপুর": ["কাজীপুর", "kazipur"],
     "রায়গঞ্জ": ["রায়গঞ্জ", "raiganj"], "শাহজাদপুর": ["শাহজাদপুর", "shahjadpur"], "তাড়াশ": ["তাড়াশ", "tarash"], "উল্লাপাড়া": ["উল্লাপাড়া", "ullapara"],
   };
@@ -30,7 +30,7 @@ async function persistSignedInLocation({ latitude=null, longitude=null, district
   } catch { /* local visitor location remains usable */ }
 }
 
-export function useVisitorLocation() {
+export function useVisitorLocation({ autoRequest = false } = {}) {
   const [location, setLocation] = useState({ district:"",upazila:"",latitude:null,longitude:null,source:"",accuracy:null,status:"idle",message:"" });
 
   useEffect(() => {
@@ -81,6 +81,37 @@ export function useVisitorLocation() {
       } catch { /* GPS result remains active even if reverse geocoder fails */ }
     },(error)=>{let message="অবস্থান অনুমতি দেওয়া হয়নি। নিচ থেকে এলাকা বেছে নিন।";if(error.code===2)message="অবস্থান পাওয়া যায়নি। নিচ থেকে এলাকা বেছে নিন।";setLocation((p)=>({...p,status:"denied",message}));},{enableHighAccuracy:true,timeout:12000,maximumAge:10*60*1000});
   },[]);
+
+  useEffect(() => {
+    if (!autoRequest || typeof window === "undefined" || typeof navigator === "undefined") return;
+    // Ask at most once per browser tab/session. A previous manual/saved area must
+    // not permanently suppress the browser's GPS permission prompt.
+    const sessionKey = "doctor_v1_location_auto_requested";
+    if (window.sessionStorage.getItem(sessionKey) === "1") return;
+
+    let cancelled = false;
+    let timer;
+    const ask = () => {
+      if (cancelled) return;
+      window.sessionStorage.setItem(sessionKey, "1");
+      requestLocation();
+    };
+
+    (async () => {
+      try {
+        if (navigator.permissions?.query) {
+          const permission = await navigator.permissions.query({ name: "geolocation" });
+          if (cancelled || permission.state === "denied") return;
+        }
+      } catch {
+        // Some browsers do not expose geolocation through Permissions API.
+        // getCurrentPosition below will still trigger the native permission UI.
+      }
+      timer = window.setTimeout(ask, 900);
+    })();
+
+    return () => { cancelled = true; if (timer) window.clearTimeout(timer); };
+  }, [autoRequest, requestLocation]);
 
   const selectArea=useCallback(async(district,upazila="")=>{
     const base={district,upazila,latitude:null,longitude:null,source:"manual",accuracy:null,status:"loading",message:upazila?`${upazila}, ${district} অনুযায়ী এলাকা নির্ধারণ করা হচ্ছে...`:`${district} জেলার স্বাস্থ্যসেবা দেখানো হচ্ছে...`};

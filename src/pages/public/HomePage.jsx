@@ -39,19 +39,8 @@ export default function HomePage() {
   const { banners } = useBanners();
   const { settings } = useSiteSettings();
   const showLocationDistance = String(settings.show_location_distance ?? "true") !== "false";
-  const { location: visitorLocation, requestLocation, selectArea, upazilas } = useVisitorLocation();
+  const { location: visitorLocation, requestLocation, selectArea, upazilas } = useVisitorLocation({ autoRequest: true });
 
-  useEffect(() => {
-    const asked = window.localStorage.getItem("doctor_v1_location_prompted");
-    const savedLocation = window.localStorage.getItem("doctor_v1_last_location");
-    if (!asked && !savedLocation) {
-      const timer = window.setTimeout(() => {
-        window.localStorage.setItem("doctor_v1_location_prompted", "1");
-        requestLocation();
-      }, 900);
-      return () => window.clearTimeout(timer);
-    }
-  }, [requestLocation]);
   const { products: localDoctors, loading: localDoctorsLoading } = useProductsByLocation({
     district: visitorLocation.district,
     upazila: visitorLocation.upazila,

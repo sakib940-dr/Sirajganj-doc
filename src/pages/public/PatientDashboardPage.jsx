@@ -5,6 +5,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/hooks/useAuth";
 import { ROUTES } from "@/constants/routes";
 import { useBloodRequests, updateBloodRequestStatus } from "@/hooks/useBloodBank";
+import { useVisitorLocation } from "@/hooks/useVisitorLocation";
+import { useProductsByLocation } from "@/hooks/useProducts";
+import LocationDoctorSection from "@/components/public/LocationDoctorSection.jsx";
 
 const BLOOD_STATUS_LABEL = { pending:"অপেক্ষমাণ", accepted:"গৃহীত", declined:"প্রত্যাখ্যাত", cancelled:"বাতিল", completed:"সম্পন্ন" };
 
@@ -25,6 +28,15 @@ export default function PatientDashboardPage() {
   const { profile, user, signOut } = useAuth();
   const { requests, loading: bloodLoading, refresh: refreshOutgoing } = useBloodRequests({ userId: user?.id, role: "patient" });
   const { requests: incomingBloodRequests, loading: incomingLoading, refresh: refreshIncoming } = useBloodRequests({ userId: user?.id, role: "patient", mode: "donor", enabled: !!profile?.blood_donor_volunteer });
+  const { location: visitorLocation, requestLocation, selectArea, upazilas } = useVisitorLocation({ autoRequest: true });
+  const { products: localDoctors, loading: localDoctorsLoading } = useProductsByLocation({
+    district: visitorLocation.district,
+    upazila: visitorLocation.upazila,
+    limit: 30,
+    visitorLatitude: visitorLocation.latitude,
+    visitorLongitude: visitorLocation.longitude,
+    visitorLocationSource: visitorLocation.source,
+  });
 
   return (
     <div className="container mx-auto max-w-5xl px-4 py-6">
@@ -47,6 +59,17 @@ export default function PatientDashboardPage() {
           <Link to={ROUTES.BLOOD_DONOR} className="rounded-lg border px-3 py-2 text-xs font-semibold">তথ্য সেট করুন</Link>
         </div>
       </div>
+
+      <LocationDoctorSection
+        location={visitorLocation}
+        requestLocation={requestLocation}
+        selectArea={selectArea}
+        upazilas={upazilas}
+        products={localDoctors}
+        loading={localDoctorsLoading}
+        viewAllTo={`${ROUTES.DOCTORS}?district=${encodeURIComponent(visitorLocation.district || "সিরাজগঞ্জ")}${visitorLocation.upazila ? `&upazila=${encodeURIComponent(visitorLocation.upazila)}` : ""}`}
+        showDistance={!!visitorLocation.latitude && !!visitorLocation.longitude}
+      />
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <Link to={ROUTES.BLOOD_BANK}>

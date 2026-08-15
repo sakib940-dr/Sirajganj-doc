@@ -36,13 +36,22 @@ export default function LoginPage() {
     let destination = ROUTES.PATIENT_DASHBOARD;
 
     if (userId) {
-      const { data: profile, error: profileError } = await supabase
-        .from("profiles")
-        .select("role")
-        .eq("id", userId)
-        .single();
+      let profile = null;
+      let profileError = null;
+      const rpcResult = await supabase.rpc("get_my_auth_profile");
+      if (!rpcResult.error && rpcResult.data) {
+        profile = rpcResult.data;
+      } else {
+        const fallback = await supabase
+          .from("profiles")
+          .select("role")
+          .eq("id", userId)
+          .single();
+        profile = fallback.data;
+        profileError = fallback.error;
+      }
 
-      if (profileError) {
+      if (profileError || !profile) {
         setError("প্রোফাইল তথ্য লোড করা যায়নি। আবার চেষ্টা করুন।");
         return;
       }

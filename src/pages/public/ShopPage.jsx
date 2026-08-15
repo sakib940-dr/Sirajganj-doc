@@ -1,6 +1,6 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { Phone, MapPin, Facebook, Map, MessageCircle, Store, Package, Heart, Navigation, Globe2 } from "lucide-react";
+import { Phone, MapPin, Facebook, Map, MessageCircle, Store, Package, Heart, Navigation } from "lucide-react";
 import { useShopBySlug } from "@/hooks/useShops";
 import { supabase } from "@/lib/supabaseClient";
 import LoadingSpinner from "@/components/shared/LoadingSpinner.jsx";
@@ -60,12 +60,14 @@ export default function ShopPage() {
     );
   }
 
-  const website = { enabled: true, hero_title: shop.shop_name, hero_subtitle: "সিরাজগঞ্জের রোগীদের জন্য বিশ্বস্ত চিকিৎসা সেবা", about_title: "আমাদের সম্পর্কে", contact_title: "যোগাযোগ ও দিকনির্দেশনা", show_doctors: true, show_gallery: true, show_about: true, cta_text: "অ্যাপয়েন্টমেন্ট নিন", ...(shop.website_config || {}) };
+  const configuredWebsite = { enabled: true, hero_title: shop.shop_name, hero_subtitle: "সিরাজগঞ্জের রোগীদের জন্য বিশ্বস্ত চিকিৎসা সেবা", about_title: "আমাদের সম্পর্কে", contact_title: "যোগাযোগ ও দিকনির্দেশনা", show_doctors: true, show_gallery: true, show_about: true, cta_text: "অ্যাপয়েন্টমেন্ট নিন", ...(shop.website_config || {}) };
+  // The Chamber/Hospital directory profile is core medical information and must
+  // remain public while the provider account itself is approved/active. The
+  // Website Builder toggle now controls optional custom sections only.
+  const website = configuredWebsite.enabled === false
+    ? { ...configuredWebsite, enabled: true, hero_title: shop.shop_name, hero_subtitle: "", show_doctors: true, show_gallery: false, show_about: false }
+    : configuredWebsite;
   const directionUrl = shop.google_map_link || (shop.address ? `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(shop.address)}` : "");
-
-  if (website.enabled === false) {
-    return <div className="container py-16"><EmptyState icon={Globe2} title="ওয়েবসাইটটি বর্তমানে বন্ধ" description="চেম্বার / হাসপাতাল কর্তৃপক্ষ এই পাবলিক পেজটি সাময়িকভাবে বন্ধ রেখেছেন।" /></div>;
-  }
 
   return (
     <div>

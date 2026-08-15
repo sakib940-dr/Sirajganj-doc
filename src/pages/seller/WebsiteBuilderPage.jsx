@@ -81,7 +81,7 @@ export default function WebsiteBuilderPage() {
         </CardHeader>
         <CardContent className="space-y-5">
           <label className="flex items-center justify-between rounded-xl border p-4">
-            <div><p className="font-medium">ওয়েবসাইট সক্রিয়</p><p className="text-xs text-muted-foreground">পাবলিক চেম্বার পেজ চালু রাখুন</p></div>
+            <div><p className="font-medium">ওয়েবসাইট সক্রিয়</p><p className="text-xs text-muted-foreground">কাস্টম ওয়েবসাইট সেকশন চালু রাখুন; মূল চেম্বার/হাসপাতাল প্রোফাইল সবসময় দেখা যাবে</p></div>
             <input type="checkbox" checked={!!config.enabled} onChange={e => update("enabled", e.target.checked)} className="h-5 w-5 accent-primary" />
           </label>
 

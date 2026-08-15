@@ -13,13 +13,25 @@ export function AuthProvider({ children }) {
       setProfile(null);
       return;
     }
-    const { data, error } = await supabase
-      .from("profiles")
-      .select("*")
-      .eq("id", userId)
-      .single();
+    // Prefer the own-profile RPC so login/bootstrap does not depend on a
+    // drifting profiles SELECT policy. Keep direct-table fallback for the
+    // short deploy window before the hotfix migration reaches Supabase.
+    let data = null;
+    let error = null;
+    const rpcResult = await supabase.rpc("get_my_auth_profile");
+    if (!rpcResult.error && rpcResult.data) {
+      data = rpcResult.data;
+    } else {
+      const fallback = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("id", userId)
+        .single();
+      data = fallback.data;
+      error = fallback.error;
+    }
 
-    if (error) {
+    if (error || !data) {
       // Signup-এর ঠিক পরপরই profile row তৈরির trigger সামান্য দেরি করলে
       // (network/replication lag) একবার আবার চেষ্টা করা হয়, যাতে ভুলভাবে
       // "visitor" role ধরে fallback না হয়ে যায়।
@@ -29,7 +41,7 @@ export function AuthProvider({ children }) {
         return;
       }
       // eslint-disable-next-line no-console
-      console.error("প্রোফাইল লোড করা যায়নি:", error.message);
+      console.error("প্রোফাইল লোড করা যায়নি:", error?.message || "profile not found");
       setProfile(null);
       return;
     }
